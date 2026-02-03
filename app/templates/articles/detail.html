@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('articles.list_articles') }}">Resources</a></li>
+                    <li class="breadcrumb-item active">{{ article.title }}</li>
+                </ol>
+            </nav>
+            
+            <article>
+                <span class="badge bg-primary mb-3">{{ article.category }}</span>
+                <h1 class="mb-3">{{ article.title }}</h1>
+                
+                <div class="text-muted mb-4">
+                    {% if article.author %}
+                    By {{ article.author.full_name }}
+                    {% endif %}
+                    {% if article.published_at %}
+                    • {{ article.published_at.strftime('%B %d, %Y') }}
+                    {% endif %}
+                </div>
+                
+                {% if article.featured_image %}
+                <img src="{{ article.featured_image }}" class="img-fluid rounded mb-4" alt="{{ article.title }}">
+                {% endif %}
+                
+                <div class="article-content">
+                    {{ article.content|safe }}
+                </div>
+            </article>
+            
+            <hr class="my-5">
+            
+            <div class="text-center">
+                <a href="{{ url_for('articles.list_articles') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Resources
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

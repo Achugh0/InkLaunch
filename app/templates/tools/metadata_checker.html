@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Metadata Checker - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Metadata Checker</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted">Validate and optimize your book metadata for better discoverability</p>
+                    
+                    <form method="POST" action="{{ url_for('tools.metadata_checker') }}">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Book Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ title or '' }}" required>
+                            <small class="form-text text-muted">Optimal: 60-80 characters</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Book Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="6" required>{{ description or '' }}</textarea>
+                            <small class="form-text text-muted">Minimum: 150 characters recommended</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Check Metadata</button>
+                        <a href="{{ url_for('tools.list_tools') }}" class="btn btn-secondary">Back to Tools</a>
+                    </form>
+                    
+                    {% if results %}
+                    <hr class="my-4">
+                    <h4>Results</h4>
+                    
+                    <div class="alert alert-{{ 'success' if results.title_optimal and results.description_optimal else 'warning' }}">
+                        <h5>Title Analysis</h5>
+                        <p><strong>Length:</strong> {{ results.title_length }} characters
+                            {% if results.title_optimal %}✓{% else %}✗{% endif %}
+                        </p>
+                        
+                        <h5>Description Analysis</h5>
+                        <p><strong>Length:</strong> {{ results.description_length }} characters
+                            {% if results.description_optimal %}✓{% else %}✗{% endif %}
+                        </p>
+                        
+                        <h5>Recommendations</h5>
+                        <ul>
+                            {% for rec in results.recommendations %}
+                            <li>{{ rec }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5>Tips</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Title</h6>
+                    <ul class="small">
+                        <li>Keep it 60-80 characters</li>
+                        <li>Include main keywords</li>
+                        <li>Be descriptive and catchy</li>
+                    </ul>
+                    
+                    <h6>Description</h6>
+                    <ul class="small">
+                        <li>Minimum 150 characters</li>
+                        <li>Include relevant keywords</li>
+                        <li>Highlight unique selling points</li>
+                        <li>Target your audience</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

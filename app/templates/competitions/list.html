@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Competitions - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Author Competitions</h1>
+    
+    <div class="alert alert-info">
+        <h5><i class="bi bi-trophy"></i> Author of the Month Competition</h5>
+        <p>Compete for recognition and showcase your best work. Winners receive featured placement and special badges.</p>
+    </div>
+    
+    {% if competitions %}
+    <div class="row">
+        {% for competition in competitions %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>{{ competition.month }} {{ competition.year }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Status:</strong> <span class="badge bg-{{ 'success' if competition.status == 'active' else 'secondary' }}">{{ competition.status }}</span></p>
+                    <p><strong>Start Date:</strong> {{ competition.start_date.strftime('%B %d, %Y') if competition.start_date else 'TBD' }}</p>
+                    <p><strong>End Date:</strong> {{ competition.end_date.strftime('%B %d, %Y') if competition.end_date else 'TBD' }}</p>
+                    {% if competition.theme %}
+                    <p><strong>Theme:</strong> {{ competition.theme }}</p>
+                    {% endif %}
+                    <a href="{{ url_for('competitions.current_competition') }}" class="btn btn-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-trophy" style="font-size: 4rem; color: #ccc;"></i>
+            <h3 class="mt-3">No Active Competitions</h3>
+            <p class="text-muted">Check back soon for upcoming author competitions!</p>
+            <p class="mt-4">In the meantime:</p>
+            <a href="{{ url_for('books.create_book') }}" class="btn btn-primary me-2">Add Your Book</a>
+            <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-primary">Browse Books</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

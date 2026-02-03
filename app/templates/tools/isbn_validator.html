@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}ISBN Validator - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">ISBN Validator</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted">Validate ISBN-10 and ISBN-13 format</p>
+                    
+                    <form method="POST" action="{{ url_for('tools.isbn_validator') }}">
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn" value="{{ isbn or '' }}" 
+                                   placeholder="Enter ISBN (with or without hyphens)" required>
+                            <small class="form-text text-muted">Examples: 0-306-40615-2 or 978-0-306-40615-7</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Validate ISBN</button>
+                        <a href="{{ url_for('tools.list_tools') }}" class="btn btn-secondary">Back to Tools</a>
+                    </form>
+                    
+                    {% if results %}
+                    <hr class="my-4">
+                    <h4>Validation Result</h4>
+                    
+                    <div class="alert alert-{{ 'success' if results.is_valid else 'danger' }}">
+                        <h5>{{ results.message }}</h5>
+                        {% if results.type %}
+                        <p><strong>Type:</strong> {{ results.type }}</p>
+                        {% endif %}
+                        <p><strong>ISBN:</strong> {{ results.isbn }}</p>
+                    </div>
+                    
+                    {% if results.book_details %}
+                    <div class="card mt-4">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="bi bi-book"></i> Book Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                {% if results.book_details.cover_url %}
+                                <div class="col-md-4 text-center">
+                                    <img src="{{ results.book_details.cover_url }}" class="img-fluid rounded shadow" alt="Book cover">
+                                </div>
+                                <div class="col-md-8">
+                                {% else %}
+                                <div class="col-md-12">
+                                {% endif %}
+                                    {% if results.book_details.title %}
+                                    <h4>{{ results.book_details.title }}</h4>
+                                    {% endif %}
+                                    
+                                    {% if results.book_details.authors %}
+                                    <p><strong>Author(s):</strong> {{ results.book_details.authors|join(', ') }}</p>
+                                    {% endif %}
+                                    
+                                    {% if results.book_details.publishers %}
+                                    <p><strong>Publisher:</strong> {{ results.book_details.publishers|join(', ') }}</p>
+                                    {% endif %}
+                                    
+                                    {% if results.book_details.publish_date %}
+                                    <p><strong>Published:</strong> {{ results.book_details.publish_date }}</p>
+                                    {% endif %}
+                                    
+                                    {% if results.book_details.number_of_pages %}
+                                    <p><strong>Pages:</strong> {{ results.book_details.number_of_pages }}</p>
+                                    {% endif %}
+                                    
+                                    {% if results.book_details.subjects %}
+                                    <p><strong>Subjects:</strong> {{ results.book_details.subjects|join(', ') }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="alert alert-info mt-3 mb-0">
+                                <small><i class="bi bi-info-circle"></i> Book information retrieved from Open Library (openlibrary.org) - a free, open-source database.</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif results.is_valid %}
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> ISBN is valid, but book details could not be found in the Open Library database.
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5>About ISBN</h5>
+                </div>
+                <div class="card-body">
+                    <h6>ISBN-10</h6>
+                    <p class="small">10-digit identifier used before 2007</p>
+                    
+                    <h6>ISBN-13</h6>
+                    <p class="small">13-digit identifier, current standard</p>
+                    
+                    <h6>Format</h6>
+                    <ul class="small">
+                        <li>Can include hyphens</li>
+                        <li>Last digit is checksum</li>
+                        <li>Validates authenticity</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

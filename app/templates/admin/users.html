@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - InkLaunch Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Users</h1>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Create New User
+        </a>
+    </div>
+    
+    {% if users %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th>Books</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' }}">
+                            {{ user.role|title }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if user.is_active else 'secondary' }}">
+                            {{ 'Active' if user.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ user.get('book_count', 0) }}</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('admin.edit_user', user_id=user._id) }}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-warning" 
+                                    onclick="resetPassword('{{ user._id }}', '{{ user.email }}')" title="Reset Password">
+                                <i class="bi bi-key"></i>
+                            </button>
+                            {% if user._id|string != session.user_id %}
+                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                    onclick="deleteUser('{{ user._id }}', '{{ user.email }}')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No users found.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="resetPasswordForm" method="POST">
+                <div class="modal-body">
+                    <p>Reset password for: <strong id="resetUserEmail"></strong></p>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" name="new_password" 
+                               required minlength="8" placeholder="Minimum 8 characters">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user: <strong id="deleteUserEmail"></strong>?</p>
+                <p class="text-danger">This will also delete all their books and reviews. This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function resetPassword(userId, userEmail) {
+    document.getElementById('resetUserEmail').textContent = userEmail;
+    document.getElementById('resetPasswordForm').action = `/admin/users/${userId}/reset-password`;
+    new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
+}
+
+function deleteUser(userId, userEmail) {
+    document.getElementById('deleteUserEmail').textContent = userEmail;
+    document.getElementById('deleteUserForm').action = `/admin/users/${userId}/delete`;
+    new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+}
+</script>
+{% endblock %}

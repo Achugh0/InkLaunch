@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ book.title }} - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Edit Book</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('books.edit_book', book_id=book._id) }}" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ book.title }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="subtitle" class="form-label">Subtitle</label>
+                            <input type="text" class="form-control" id="subtitle" name="subtitle" value="{{ book.subtitle or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="genre" class="form-label">Genre *</label>
+                            <select class="form-control" id="genre" name="genre" required>
+                                {% for g in genres %}
+                                <option value="{{ g }}" {% if g == book.genre %}selected{% endif %}>{{ g }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="cover_image" class="form-label">New Cover Image</label>
+                            <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*">
+                            <small class="form-text text-muted">Leave blank to keep current image</small>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="isbn" name="isbn" value="{{ book.isbn or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="page_count" class="form-label">Page Count</label>
+                            <input type="number" class="form-control" id="page_count" name="page_count" value="{{ book.page_count or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price ($)</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" value="{{ book.price or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="amazon_link" class="form-label">Amazon Link</label>
+                            <input type="url" class="form-control" id="amazon_link" name="amazon_link" value="{{ book.amazon_link or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="goodreads_link" class="form-label">Goodreads Link</label>
+                            <input type="url" class="form-control" id="goodreads_link" name="goodreads_link" value="{{ book.goodreads_link or '' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control" id="description" name="description" rows="6" required>{{ book.description }}</textarea>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('books.get_book', book_id=book._id) }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

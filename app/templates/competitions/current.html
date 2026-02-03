@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Current Competition - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Current Competition</h1>
+    
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-trophy" style="font-size: 4rem; color: #ccc;"></i>
+            <h3 class="mt-3">No Active Competition</h3>
+            <p class="text-muted">There is no active competition at this time. Check back soon!</p>
+            <p class="mt-4">Competition features coming soon:</p>
+            <ul class="text-start" style="max-width: 500px; margin: 0 auto;">
+                <li>Monthly "Author of the Month" recognition</li>
+                <li>AI-powered book analysis and scoring</li>
+                <li>Winner badges and featured placement</li>
+                <li>Community voting and engagement</li>
+            </ul>
+            <div class="mt-4">
+                <a href="{{ url_for('books.create_book') }}" class="btn btn-primary me-2">Add Your Book</a>
+                <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-primary">Browse Books</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

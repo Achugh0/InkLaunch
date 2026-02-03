@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}My Service Requests - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold mb-4"><i class="bi bi-briefcase"></i> My Service Requests</h2>
+
+    {% if requests %}
+    <div class="row">
+        {% for req in requests %}
+        <div class="col-12 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="fw-bold mb-2">{{ req.service_name }}</h5>
+                            <p class="text-muted mb-2">
+                                <strong>Status:</strong>
+                                {% if req.status == 'pending' %}
+                                <span class="badge bg-warning">⏳ Pending Review</span>
+                                {% elif req.status == 'in_progress' %}
+                                <span class="badge bg-primary">🔄 In Progress</span>
+                                {% elif req.status == 'completed' %}
+                                <span class="badge bg-success">✅ Completed</span>
+                                {% elif req.status == 'cancelled' %}
+                                <span class="badge bg-danger">❌ Cancelled</span>
+                                {% endif %}
+                            </p>
+                            <p class="mb-1"><strong>Request ID:</strong> {{ req._id }}</p>
+                            <p class="mb-1"><strong>Submitted:</strong> {{ req.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            <p class="mb-0"><strong>Price:</strong> ${{ req.price }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="{{ url_for('services.service_detail', service_id=req.service_id) }}" class="btn btn-outline-primary btn-sm">
+                                View Service
+                            </a>
+                        </div>
+                    </div>
+                    {% if req.details %}
+                    <hr>
+                    <p class="mb-0"><strong>Details:</strong> {{ req.details[:200] }}{% if req.details|length > 200 %}...{% endif %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h5><i class="bi bi-info-circle me-2"></i>No Service Requests Yet</h5>
+        <p class="mb-3">You haven't requested any services yet. Explore our professional services to take your book to the next level!</p>
+        <a href="{{ url_for('services.list_services') }}" class="btn btn-primary">
+            <i class="bi bi-briefcase"></i> Browse Services
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

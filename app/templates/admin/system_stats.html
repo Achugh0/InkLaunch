@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}System Statistics - InkLaunch Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">System Statistics</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Users</h5>
+                    <h2 class="text-primary">{{ stats.collections.users }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Books</h5>
+                    <h2 class="text-success">{{ stats.collections.books }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Reviews</h5>
+                    <h2 class="text-info">{{ stats.collections.reviews }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">DB Size</h5>
+                    <h2 class="text-warning">{{ "%.2f"|format(stats.db_size) }} MB</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Users</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent_users %}
+                    <ul class="list-unstyled">
+                        {% for user in stats.recent_users %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('users.get_user', user_id=user._id) }}">
+                                {{ user.full_name }}
+                            </a>
+                            <br>
+                            <small class="text-muted">{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No recent users</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Books</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent_books %}
+                    <ul class="list-unstyled">
+                        {% for book in stats.recent_books %}
+                        <li class="mb-2">
+                            <a href="{{ url_for('books.get_book', book_id=book._id) }}">
+                                {{ book.title }}
+                            </a>
+                            {% if book.author %}
+                            <br>
+                            <small class="text-muted">by {{ book.author.full_name }}</small>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No recent books</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent_reviews %}
+                    <ul class="list-unstyled">
+                        {% for review in stats.recent_reviews %}
+                        <li class="mb-2">
+                            {% if review.reviewer %}
+                            {{ review.reviewer.full_name }}
+                            {% endif %}
+                            reviewed
+                            {% if review.book %}
+                            <a href="{{ url_for('books.get_book', book_id=review.book._id) }}">
+                                {{ review.book.title }}
+                            </a>
+                            {% endif %}
+                            <br>
+                            <small class="text-muted">{{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No recent reviews</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

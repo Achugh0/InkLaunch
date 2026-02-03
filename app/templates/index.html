@@ -1,0 +1,593 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .hero-gradient {
+        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+    }
+    
+    .glow-btn {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
+    }
+    
+    .glow-btn:hover {
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+        transform: scale(1.05);
+    }
+    
+    .pulse-icon {
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    .book-card-modern {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .book-card-modern:hover {
+        transform: translateY(-15px) rotate(-2deg);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .neon-text {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8),
+                     0 0 20px rgba(255, 255, 255, 0.6),
+                     0 0 30px rgba(255, 255, 255, 0.4);
+    }
+    
+    .stats-counter {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .feature-card {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+    }
+    
+    .feature-card:hover {
+        transform: scale(1.08);
+    }
+    
+    .rainbow-border {
+        position: relative;
+        border-radius: 15px;
+        background: linear-gradient(45deg, #ff0081, #fc466b, #3f5efb, #2ecc71, #f7b733);
+        background-size: 300% 300%;
+        animation: gradient-shift 5s ease infinite;
+        padding: 3px;
+    }
+    
+    .rainbow-border-inner {
+        background: white;
+        border-radius: 13px;
+        padding: 2rem;
+    }
+</style>
+
+<!-- Epic Hero Section -->
+<div class="hero-gradient text-white py-5 position-relative overflow-hidden">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 py-4">
+                <div class="mb-4">
+                    <span class="badge bg-warning text-dark px-4 py-2 rounded-pill pulse-icon" style="font-size: 1.1rem;">
+                        🚀 #1 Platform for Indie Authors
+                    </span>
+                </div>
+                <h1 class="display-2 fw-bold mb-4 neon-text" style="font-size: 4rem;">
+                    Your Story <br>
+                    Deserves The <br>
+                    <span style="background: linear-gradient(135deg, #FFF 0%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Spotlight</span> ✨
+                </h1>
+                <p class="lead mb-4" style="font-size: 1.4rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    Join 1000+ authors getting their books reviewed. Submit your work, receive feedback, and win awards! 🏆
+                </p>
+                {% if not session.user_id %}
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5 py-3 glow-btn" style="border-radius: 50px; font-weight: bold;">
+                        🎯 Start For Free
+                    </a>
+                    <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-light btn-lg px-5 py-3" style="border-radius: 50px; border-width: 3px;">
+                        📚 Explore Books
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('books.create_book') }}" class="btn btn-warning btn-lg px-5 py-3 glow-btn" style="border-radius: 50px; font-weight: bold;">
+                        ⚡ Submit Your Book
+                    </a>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-light btn-lg px-5 py-3" style="border-radius: 50px; border-width: 3px;">
+                        🎯 Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <div class="position-relative" style="animation: float 3s ease-in-out infinite;">
+                    <i class="bi bi-book-half" style="font-size: 20rem; opacity: 0.9; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.5));"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Floating Elements -->
+    <div class="position-absolute" style="top: 10%; left: 5%; font-size: 3rem; opacity: 0.6; animation: float 4s ease-in-out infinite;">💫</div>
+    <div class="position-absolute" style="top: 60%; right: 10%; font-size: 2.5rem; opacity: 0.6; animation: float 3.5s ease-in-out infinite 0.5s;">✨</div>
+    <div class="position-absolute" style="bottom: 20%; left: 15%; font-size: 2rem; opacity: 0.6; animation: float 4.5s ease-in-out infinite 1s;">🌟</div>
+</div>
+
+<!-- Live Stats Bar -->
+<div class="bg-dark text-white py-4" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <div class="stats-counter pulse-icon">{{ stats.total_users or 0 }}+</div>
+                <p class="mb-0 text-uppercase fw-bold" style="letter-spacing: 2px;">
+                    👥 Creative Minds
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-counter pulse-icon">{{ stats.total_books or 0 }}+</div>
+                <p class="mb-0 text-uppercase fw-bold" style="letter-spacing: 2px;">
+                    📖 Stories Shared
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-counter pulse-icon">{{ stats.total_reviews or 0 }}+</div>
+                <p class="mb-0 text-uppercase fw-bold" style="letter-spacing: 2px;">
+                    ⭐ Reviews Given
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Professional Services Section -->
+<div class="py-5 my-5" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    <div class="container">
+        <div class="text-center text-white mb-5">
+            <h2 class="display-4 fw-bold mb-3">💼 Professional Services</h2>
+            <p class="lead">Take your book to the next level with expert help</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">🎨</div>
+                        <h4 class="fw-bold mb-3">Cover Design</h4>
+                        <p class="text-muted mb-3">Professional, eye-catching book covers that sell</p>
+                        <p class="h3 text-primary fw-bold mb-3">$75</p>
+                        <a href="{{ url_for('services.service_detail', service_id='cover_design') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">✏️</div>
+                        <h4 class="fw-bold mb-3">Professional Editing</h4>
+                        <p class="text-muted mb-3">Polish your manuscript to perfection</p>
+                        <p class="h3 text-primary fw-bold mb-3">From $75</p>
+                        <small class="text-muted d-block">Based on page count</small>
+                        <a href="{{ url_for('services.service_detail', service_id='editing') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">👻</div>
+                        <h4 class="fw-bold mb-3">Ghost Writing</h4>
+                        <p class="text-muted mb-3">Bring your story ideas to life professionally</p>
+                        <p class="h3 text-primary fw-bold mb-3">$750</p>
+                        <a href="{{ url_for('services.service_detail', service_id='ghostwriting') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('services.list_services') }}" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px;">
+                <i class="bi bi-briefcase"></i> View All Services
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Trending Books Section -->
+<div class="container my-5 py-4">
+    <div class="text-center mb-5">
+        <h2 class="display-4 fw-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            🔥 Hot Off The Press
+        </h2>
+        <p class="lead text-muted">Discover fresh stories from talented authors</p>
+    </div>
+    
+    {% if books %}
+    <div class="row g-4">
+        {% for book in books %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card book-card-modern border-0 shadow h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'" style="cursor: pointer;">
+                <div class="position-relative overflow-hidden">
+                    {% if book.cover_image_url %}
+                    <img src="{{ book.cover_image_url }}" class="card-img-top" alt="{{ book.title }}" style="height: 320px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center position-relative" 
+                         style="height: 320px; background: linear-gradient(135deg, {{ ['#f093fb 0%, #f5576c', '#4facfe 0%, #00f2fe', '#43e97b 0%, #38f9d7', '#fa709a 0%, #fee140', '#667eea 0%, #764ba2', '#ff6e7f 0%, #bfe9ff'][loop.index0 % 6] }} 100%);">
+                        <div class="text-center text-white p-3">
+                            <i class="bi bi-book-fill" style="font-size: 4rem; opacity: 0.3;"></i>
+                            <p class="mt-2 fw-bold" style="font-size: 0.9rem; opacity: 0.7; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                                {{ book.title[:30] }}{{ '...' if book.title|length > 30 }}
+                            </p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if book.is_award_winner %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                            <i class="bi bi-trophy-fill"></i> Winner
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="position-absolute bottom-0 start-0 m-2">
+                        <span class="badge" style="background: rgba(0,0,0,0.7); padding: 8px 12px; border-radius: 10px;">
+                            <i class="bi bi-eye"></i> {{ book.views_count or 0 }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-truncate" title="{{ book.title }}">
+                        {{ book.title }}
+                    </h5>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="bi bi-person-fill"></i>
+                        {% if book.author %}
+                            {{ book.author.full_name }}
+                        {% else %}
+                            Anonymous
+                        {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge px-3 py-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
+                            {{ book.genre }}
+                        </span>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill">
+                            Read More →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{{ url_for('books.list_books') }}" class="btn btn-lg px-5 py-3" 
+           style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50px; font-weight: bold; box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);">
+            🚀 Explore All Books
+        </a>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="rainbow-border d-inline-block">
+            <div class="rainbow-border-inner text-center">
+                <i class="bi bi-rocket-takeoff" style="font-size: 5rem; color: #667eea;"></i>
+                <h3 class="mt-3 fw-bold">Be The First! 🎉</h3>
+                <p class="text-muted mb-4">No books yet? Time to make history!</p>
+                {% if session.user_id %}
+                <a href="{{ url_for('books.create_book') }}" class="btn btn-primary btn-lg px-5 rounded-pill">
+                    <i class="bi bi-plus-circle"></i> Add Your Book
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg px-5 rounded-pill">
+                    <i class="bi bi-rocket-takeoff"></i> Join Now Free
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="py-5" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                Why Authors Love Us ❤️
+            </h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-body text-white text-center p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-book-fill pulse-icon" style="font-size: 5rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">📚 Showcase Your Genius</h4>
+                        <p style="font-size: 1.1rem;">Beautiful book profiles that make your work shine. Add covers, descriptions, and links!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="card-body text-white text-center p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-people-fill pulse-icon" style="font-size: 5rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">💬 Real Feedback</h4>
+                        <p style="font-size: 1.1rem;">Get constructive reviews from fellow authors. Grow together as a community!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-lg" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="card-body text-white text-center p-5">
+                        <div class="mb-4">
+                            <i class="bi bi-trophy-fill pulse-icon" style="font-size: 5rem;"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">🏆 Win Recognition</h4>
+                        <p style="font-size: 1.1rem;">Monthly competitions with AI-powered reviews. Get the spotlight you deserve!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not session.user_id %}
+<div class="py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container py-5 text-center position-relative">
+        <h2 class="display-3 fw-bold mb-4 neon-text">Ready To Go Viral? 🚀</h2>
+        <p class="lead mb-5" style="font-size: 1.5rem;">Join thousands of authors already winning!</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5 py-4 glow-btn" style="border-radius: 50px; font-size: 1.3rem; font-weight: bold;">
+            🎯 Join Free Now - It's Lit! 🔥
+        </a>
+    </div>
+    
+    <!-- Animated background elements -->
+    <div class="position-absolute" style="top: 10%; left: 5%; font-size: 4rem; opacity: 0.3; animation: float 5s ease-in-out infinite;">📚</div>
+    <div class="position-absolute" style="bottom: 10%; right: 5%; font-size: 4rem; opacity: 0.3; animation: float 6s ease-in-out infinite 1s;">✍️</div>
+    <div class="position-absolute" style="top: 50%; left: 10%; font-size: 3rem; opacity: 0.3; animation: float 4.5s ease-in-out infinite 0.5s;">⭐</div>
+</div>
+{% endif %}
+<!-- Hero Section -->
+<div class="bg-gradient-primary text-white py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 py-5">
+                <h1 class="display-3 fw-bold mb-4">Launch Your Literary Journey</h1>
+                <p class="lead mb-4">Join a vibrant community of authors. Showcase your work, receive meaningful feedback, and compete for monthly recognition.</p>
+                {% if not session.user_id %}
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-rocket-takeoff"></i> Get Started Free
+                    </a>
+                    <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-light btn-lg px-4">
+                        Browse Books
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('books.create_book') }}" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-plus-circle"></i> Add Your Book
+                    </a>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-light btn-lg px-4">
+                        Go to Dashboard
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <i class="bi bi-book-half" style="font-size: 15rem; opacity: 0.2;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Bar -->
+<div class="bg-dark text-white py-4">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h3 class="fw-bold mb-0"><i class="bi bi-people-fill text-primary"></i> {{ stats.total_users or 0 }}+</h3>
+                <p class="mb-0 text-muted">Active Authors</p>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h3 class="fw-bold mb-0"><i class="bi bi-book-fill text-success"></i> {{ stats.total_books or 0 }}+</h3>
+                <p class="mb-0 text-muted">Books Submitted</p>
+            </div>
+            <div class="col-md-4">
+                <h3 class="fw-bold mb-0"><i class="bi bi-star-fill text-warning"></i> {{ stats.total_reviews or 0 }}+</h3>
+                <p class="mb-0 text-muted">Reviews Written</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Recently Added Books -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-stars text-warning"></i> Recently Added
+        </h2>
+        <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-primary">
+            View All <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    
+    {% if books %}
+    <div class="row g-4">
+        {% for book in books %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+            <div class="card book-card h-100 border-0 shadow-sm" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'">
+                <div class="position-relative">
+                    {% if book.cover_image_url %}
+                    <img src="{{ book.cover_image_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
+                    {% else %}
+                    <div class="book-cover bg-gradient d-flex align-items-center justify-content-center" 
+                         style="background: linear-gradient(135deg, {{ ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'][loop.index0 % 6] }} 0%, {{ ['#764ba2', '#667eea', '#4facfe', '#00f2fe', '#38f9d7', '#fee140'][loop.index0 % 6] }} 100%);">
+                        <div class="text-center text-white p-3">
+                            <i class="bi bi-book" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <p class="mt-2 fw-bold small" style="opacity: 0.5;">{{ book.title[:20] }}...</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if book.is_award_winner %}
+                    <span class="position-absolute top-0 end-0 m-2 badge bg-warning">
+                        <i class="bi bi-trophy-fill"></i> Winner
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-truncate" title="{{ book.title }}">{{ book.title }}</h5>
+                    <p class="card-text text-muted small mb-2">
+                        <i class="bi bi-person"></i>
+                        {% if book.author %}
+                            {{ book.author.full_name }}
+                        {% else %}
+                            Anonymous
+                        {% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">{{ book.genre }}</span>
+                        <small class="text-muted">
+                            <i class="bi bi-eye"></i> {{ book.views_count or 0 }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 5rem; color: #ddd;"></i>
+        <h3 class="mt-3 text-muted">No books yet</h3>
+        <p class="text-muted">Be the first to share your literary masterpiece!</p>
+        {% if session.user_id %}
+        <a href="{{ url_for('books.create_book') }}" class="btn btn-primary btn-lg mt-3">
+            <i class="bi bi-plus-circle"></i> Add Your Book
+        </a>
+        {% else %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg mt-3">
+            <i class="bi bi-rocket-takeoff"></i> Join Now
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Features Section -->
+<div class="bg-light py-5 mt-5">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">Why Authors Choose InkLaunch</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-book text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Showcase Your Work</h4>
+                    <p class="text-muted">Create a beautiful portfolio to display your books with rich metadata, cover images, and detailed descriptions.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-people text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Peer Reviews</h4>
+                    <p class="text-muted">Exchange constructive feedback with fellow authors and improve your craft through community engagement.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-trophy text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold">Monthly Competition</h4>
+                    <p class="text-muted">Compete for "Author of the Month" with AI-powered reviews and gain recognition for your literary excellence.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="container my-5 py-5">
+    <h2 class="text-center mb-5 fw-bold">How It Works</h2>
+    <div class="row g-4">
+        <div class="col-md-3 text-center">
+            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 80px; height: 80px;">
+                <h2 class="mb-0">1</h2>
+            </div>
+            <h5 class="fw-bold">Sign Up</h5>
+            <p class="text-muted">Create your free author account in seconds</p>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 80px; height: 80px;">
+                <h2 class="mb-0">2</h2>
+            </div>
+            <h5 class="fw-bold">Add Books</h5>
+            <p class="text-muted">Upload your book details and cover image</p>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 80px; height: 80px;">
+                <h2 class="mb-0">3</h2>
+            </div>
+            <h5 class="fw-bold">Get Reviews</h5>
+            <p class="text-muted">Exchange feedback with other authors</p>
+        </div>
+        <div class="col-md-3 text-center">
+            <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                 style="width: 80px; height: 80px;">
+                <h2 class="mb-0">4</h2>
+            </div>
+            <h5 class="fw-bold">Win Awards</h5>
+            <p class="text-muted">Compete for monthly recognition</p>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not session.user_id %}
+<div class="bg-primary text-white py-5">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Ready to Launch Your Book?</h2>
+        <p class="lead mb-4">Join thousands of authors sharing their stories</p>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-rocket-takeoff"></i> Start Your Journey
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

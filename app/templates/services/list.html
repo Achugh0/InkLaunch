@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Professional Services - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-primary text-white py-5 mb-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-4 fw-bold mb-3">📋 Professional Services</h1>
+            <p class="lead">Expert help to take your book to the next level</p>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <!-- Featured Services -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">Our Services</h2>
+                <span class="badge bg-success fs-6">💰 Revenue Services</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="row g-4">
+        {% for service_id, service in services.items() %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-lift">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div style="font-size: 4rem;">{{ service.icon }}</div>
+                    </div>
+                    <h4 class="card-title text-center mb-3">{{ service.name }}</h4>
+                    <p class="text-muted text-center mb-3">{{ service.description }}</p>
+                    
+                    <div class="text-center mb-3">
+                        {% if service.price == 0 %}
+                        <h2 class="text-success fw-bold">FREE</h2>
+                        {% elif service.price_tiers %}
+                        <h2 class="text-primary fw-bold">From ${{ service.price }}</h2>
+                        <small class="text-muted d-block">Based on page count</small>
+                        {% else %}
+                        <h2 class="text-primary fw-bold">${{ service.price }}</h2>
+                        {% endif %}
+                        <small class="text-muted">{{ service.delivery_days }}-day delivery</small>
+                    </div>
+
+                    <ul class="list-unstyled mb-4">
+                        {% for feature in service.features %}
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>{{ feature }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card-footer bg-transparent border-0 pb-3">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('services.service_detail', service_id=service_id) }}" class="btn btn-outline-primary">
+                            View Details
+                        </a>
+                        {% if session.user_id %}
+                        <a href="{{ url_for('services.request_service', service_id=service_id) }}" class="btn btn-primary">
+                            Request Service
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                            Login to Request
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Why Choose Us Section -->
+    <div class="row mt-5 py-5 bg-light rounded">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold">Why Choose Our Services?</h2>
+        </div>
+        <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem;">⭐</div>
+            <h5 class="fw-bold mt-3">Top Professionals</h5>
+            <p class="text-muted">Work with experienced industry experts</p>
+        </div>
+        <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem;">💯</div>
+            <h5 class="fw-bold mt-3">Quality Guaranteed</h5>
+            <p class="text-muted">100% satisfaction or money back</p>
+        </div>
+        <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem;">⚡</div>
+            <h5 class="fw-bold mt-3">Fast Delivery</h5>
+            <p class="text-muted">Quick turnaround times on all services</p>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="text-center mt-5 p-5 bg-primary text-white rounded">
+        <h2 class="fw-bold mb-3">Need Custom Services?</h2>
+        <p class="lead mb-4">We can create a custom package tailored to your needs</p>
+        <a href="mailto:services@inklaunch.com" class="btn btn-light btn-lg px-5">
+            <i class="bi bi-envelope"></i> Contact Us
+        </a>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

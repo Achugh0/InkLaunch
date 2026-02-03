@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.full_name }} - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            {% if user.profile_image_url %}
+            <img src="{{ user.profile_image_url }}" class="img-fluid rounded-circle" alt="{{ user.full_name }}">
+            {% else %}
+            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 200px; height: 200px;">
+                <i class="bi bi-person" style="font-size: 5rem;"></i>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-9">
+            <h1>{{ user.full_name }}</h1>
+            {% if user.bio %}
+            <p class="lead">{{ user.bio }}</p>
+            {% endif %}
+            
+            <div class="mb-3">
+                <span class="badge bg-primary">{{ books_count }} Books</span>
+                <span class="badge bg-info">{{ reviews_count }} Reviews</span>
+                {% if user.total_wins > 0 %}
+                <span class="badge bg-warning">{{ user.total_wins }} Competition Wins</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <hr class="my-5">
+    
+    <h3>Published Books</h3>
+    
+    {% if books %}
+    <div class="row">
+        {% for book in books %}
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="card book-card h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'">
+                {% if book.cover_image_url %}
+                <img src="{{ book.cover_image_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="{{ book.title }}">
+                {% else %}
+                <div class="bg-secondary" style="height: 250px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-book text-white" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text"><small class="text-muted">{{ book.genre }}</small></p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">No books published yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

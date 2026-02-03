@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">My Dashboard</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Welcome, {{ user.full_name }}!</h5>
+                    <p class="text-muted">{{ user.email }}</p>
+                    {% if user.role == 'admin' %}
+                    <span class="badge bg-danger">Admin</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>My Books</h3>
+        <a href="{{ url_for('books.create_book') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Book
+        </a>
+    </div>
+    
+    {% if books %}
+    <div class="row">
+        {% for book in books %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                {% if book.cover_image_url %}
+                <img src="{{ book.cover_image_url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ book.title }}">
+                {% else %}
+                <div class="bg-secondary" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-book text-white" style="font-size: 3rem;"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <p class="card-text"><small class="text-muted">{{ book.genre }}</small></p>
+                    <p class="card-text"><small>Status: {{ book.status }}</small></p>
+                    <div class="btn-group w-100">
+                        <a href="{{ url_for('books.get_book', book_id=book._id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{{ url_for('books.edit_book', book_id=book._id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        You haven't added any books to the repository yet. <a href="{{ url_for('books.create_book') }}">Add your first book</a>!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

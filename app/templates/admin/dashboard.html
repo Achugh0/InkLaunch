@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Admin Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <h2>{{ stats.total_users }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Books</h5>
+                    <h2>{{ stats.total_books }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Reviews</h5>
+                    <h2>{{ stats.total_reviews }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Reviews</h5>
+                    <h2>{{ stats.pending_reviews }}</h2>
+                    {% if stats.pending_reviews > 0 %}
+                    <a href="{{ url_for('admin.pending_reviews') }}" class="btn btn-sm btn-light mt-2">Review Now</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <h6>User Management</h6>
+                            <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-primary btn-sm d-block mb-2">
+                                <i class="bi bi-people"></i> Manage Users
+                            </a>
+                            <a href="{{ url_for('admin.create_user') }}" class="btn btn-outline-success btn-sm d-block">
+                                <i class="bi bi-person-plus"></i> Create New User
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6>Content Management</h6>
+                            <a href="{{ url_for('admin.list_books') }}" class="btn btn-outline-primary btn-sm d-block mb-2">
+                                <i class="bi bi-book"></i> Manage Books
+                            </a>
+                            <a href="{{ url_for('admin.pending_reviews') }}" class="btn btn-outline-warning btn-sm d-block">
+                                <i class="bi bi-check-circle"></i> Moderate Reviews
+                            </a>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <h6>System</h6>
+                            <a href="{{ url_for('admin.system_stats') }}" class="btn btn-outline-info btn-sm d-block mb-2">
+                                <i class="bi bi-graph-up"></i> System Statistics
+                            </a>
+                            <a href="{{ url_for('books.list_books') }}" class="btn btn-outline-secondary btn-sm d-block">
+                                <i class="bi bi-collection"></i> View All Books
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

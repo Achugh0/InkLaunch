@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Request {{ service.name }} - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('services.list_services') }}">Services</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('services.service_detail', service_id=service.id) }}">{{ service.name }}</a></li>
+                    <li class="breadcrumb-item active">Request</li>
+                </ol>
+            </nav>
+
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div style="font-size: 4rem;">{{ service.icon }}</div>
+                        <h2 class="fw-bold mt-3">Request {{ service.name }}</h2>
+                        <p class="text-muted">Price: <strong class="text-primary">${{ service.price }}</strong></p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('services.request_service', service_id=service.id) }}">
+                        <div class="mb-4">
+                            <label for="contact_email" class="form-label fw-bold">Contact Email *</label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email" required>
+                            <small class="text-muted">We'll use this to send you updates</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="contact_phone" class="form-label fw-bold">Phone Number (Optional)</label>
+                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="details" class="form-label fw-bold">Project Details *</label>
+                            <textarea class="form-control" id="details" name="details" rows="6" required placeholder="Please provide details about your project, requirements, deadlines, and any specific preferences..."></textarea>
+                            <small class="text-muted">Be as specific as possible to help us serve you better</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="urgency" class="form-label fw-bold">Urgency</label>
+                            <select class="form-select" id="urgency" name="urgency">
+                                <option value="standard">Standard ({{ service.delivery_days }} days) - No extra charge</option>
+                                <option value="rush">Rush (50% faster) - +50% fee</option>
+                                <option value="urgent">Urgent (75% faster) - +100% fee</option>
+                            </select>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>What happens next?</h6>
+                            <ol class="mb-0 ps-3">
+                                <li>We'll review your request within 24 hours</li>
+                                <li>You'll receive a detailed quote and timeline</li>
+                                <li>Upon your approval, we'll start working</li>
+                                <li>You'll receive the deliverables as promised</li>
+                            </ol>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-send"></i> Submit Request
+                            </button>
+                            <a href="{{ url_for('services.service_detail', service_id=service.id) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Service
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

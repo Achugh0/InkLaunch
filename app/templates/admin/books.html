@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Books - InkLaunch Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Manage Books</h1>
+    
+    {% if books %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Cover</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Views</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                <tr>
+                    <td>
+                        {% if book.cover_image_url %}
+                        <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" 
+                             style="width: 40px; height: 60px; object-fit: cover;">
+                        {% else %}
+                        <div style="width: 40px; height: 60px; background: #ddd;"></div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('books.get_book', book_id=book._id) }}">
+                            {{ book.title }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if book.author %}
+                        <a href="{{ url_for('users.get_user', user_id=book.author._id) }}">
+                            {{ book.author.full_name }}
+                        </a>
+                        {% else %}
+                        <em>Unknown</em>
+                        {% endif %}
+                    </td>
+                    <td>{{ book.genre }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if book.status == 'active' else 'secondary' }}">
+                            {{ book.status|title }}
+                        </span>
+                    </td>
+                    <td>{{ book.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ book.views_count }}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                onclick="deleteBook('{{ book._id }}', '{{ book.title }}')" title="Delete">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        No books found.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteBookModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete book: <strong id="deleteBookTitle"></strong>?</p>
+                <p class="text-danger">This will also delete all reviews for this book. This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteBookForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete Book</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteBook(bookId, bookTitle) {
+    document.getElementById('deleteBookTitle').textContent = bookTitle;
+    document.getElementById('deleteBookForm').action = `/admin/books/${bookId}/delete`;
+    new bootstrap.Modal(document.getElementById('deleteBookModal')).show();
+}
+</script>
+{% endblock %}
