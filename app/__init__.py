@@ -20,6 +20,18 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
     
+    # Map common environment names to config keys
+    config_mapping = {
+        'prod': 'production',
+        'production': 'production',
+        'dev': 'development',
+        'development': 'development',
+        'test': 'testing',
+        'testing': 'testing'
+    }
+    
+    config_name = config_mapping.get(config_name.lower(), 'development')
+    
     app = Flask(__name__)
     app.config.from_object(config[config_name])
     
