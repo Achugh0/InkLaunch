@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Blurb Generator - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-4"><i class="bi bi-file-text"></i> AI Blurb Generator</h1>
+            <p class="text-center text-muted mb-4">Create compelling book descriptions (3 free generations per month)</p>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Book Title</label>
+                            <input type="text" class="form-control" name="book_title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Genre</label>
+                            <select class="form-select" name="genre" required>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Science Fiction">Science Fiction</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Plot Summary</label>
+                            <textarea class="form-control" name="plot_summary" rows="5" 
+                                      placeholder="Briefly describe your plot..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tone</label>
+                            <select class="form-select" name="tone">
+                                <option value="exciting">Exciting</option>
+                                <option value="mysterious">Mysterious</option>
+                                <option value="emotional">Emotional</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-stars"></i> Generate Blurb
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if generated_blurb %}
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title">Generated Blurb</h5>
+                    <div class="alert alert-light">
+                        <p class="mb-0">{{ generated_blurb }}</p>
+                    </div>
+                    <button class="btn btn-outline-primary" onclick="copyToClipboard()">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                </div>
+            </div>
+
+            <script>
+            function copyToClipboard() {
+                const text = "{{ generated_blurb }}";
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Blurb copied to clipboard!');
+                });
+            }
+            </script>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

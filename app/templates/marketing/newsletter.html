@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter Subscribers - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-envelope"></i> Newsletter Subscribers</h1>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Add Subscriber</h5>
+                    <form method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="email" class="form-control" name="email" placeholder="Email address" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="name" placeholder="Name (optional)">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Add</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Subscribers ({{ subscribers|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if subscribers %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Subscribed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sub in subscribers %}
+                                <tr>
+                                    <td>{{ sub.email }}</td>
+                                    <td>{{ sub.subscriber_name or '-' }}</td>
+                                    <td>{{ sub.subscribed_at.strftime('%b %d, %Y') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-4">No subscribers yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Embed Code</h6>
+                    <p class="text-muted small">Add this to your author profile or website:</p>
+                    <textarea class="form-control font-monospace small" rows="8" readonly>
+<form action="{{ url_for('marketing.subscribe', author_id=user._id, _external=True) }}" method="POST">
+  <input type="email" name="email" placeholder="Your email" required>
+  <input type="text" name="name" placeholder="Your name">
+  <button type="submit">Subscribe</button>
+</form></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

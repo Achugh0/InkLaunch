@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Title Tester - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-check-circle"></i> Title Tester</h1>
+    <p class="lead">Get community feedback on your book title options</p>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Create Title Test</h5>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="genre" class="form-label">Book Genre</label>
+                            <select class="form-select" id="genre" name="genre" required>
+                                <option value="">Select genre...</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Science Fiction">Science Fiction</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Horror">Horror</option>
+                                <option value="Literary Fiction">Literary Fiction</option>
+                                <option value="Historical">Historical</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Brief Description (Optional)</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Brief plot summary to help voters..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Title Options (2-5 options)</label>
+                            {% for i in range(1, 6) %}
+                            <input type="text" class="form-control mb-2" name="title_{{ i }}" 
+                                   placeholder="Title option {{ i }}" {% if i <= 2 %}required{% endif %}>
+                            {% endfor %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-vote-fill"></i> Create Title Test
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Active Tests -->
+            {% if active_tests %}
+            <h4 class="mb-3">Community Title Tests</h4>
+            {% for test in active_tests %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="card-title">{{ test.book_genre }} Book Title</h6>
+                    {% if test.description %}
+                    <p class="text-muted small">{{ test.description }}</p>
+                    {% endif %}
+                    <div class="list-group">
+                        {% for option in test.title_options %}
+                        <a href="{{ url_for('writing.view_title_test', test_id=test._id) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>{{ option.title }}</span>
+                                <span class="badge bg-primary rounded-pill">{{ option.votes }} votes</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="bi bi-people"></i> {{ test.total_votes }} total votes
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">How it Works</h6>
+                    <ol>
+                        <li>Submit 2-5 title options</li>
+                        <li>Community votes on their favorite</li>
+                        <li>Check for duplicate titles</li>
+                        <li>View results in real-time</li>
+                    </ol>
+                    <p class="text-muted small mt-3">
+                        <i class="bi bi-info-circle"></i> Tests are active for 24 hours
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

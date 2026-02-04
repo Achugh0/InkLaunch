@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Marketing Tools - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="bi bi-megaphone"></i> Marketing & Promotion Tools
+            </h1>
+            <p class="lead">Amplify your book's reach with our free marketing features</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+        <!-- Press Kit Generator -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-file-earmark-text text-primary"></i> Press Kit Generator
+                    </h5>
+                    <p class="card-text">Create a professional press kit with your bio, book covers, and achievements.</p>
+                    <a href="{{ url_for('marketing.press_kit') }}" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Create Press Kit
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newsletter Integration -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-envelope text-success"></i> Newsletter Subscribers
+                    </h5>
+                    <p class="card-text">Collect and manage email subscribers directly from your author profile.</p>
+                    <a href="{{ url_for('marketing.newsletter') }}" class="btn btn-success">
+                        <i class="bi bi-people"></i> Manage Subscribers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Giveaways -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-gift text-danger"></i> Book Giveaways
+                    </h5>
+                    <p class="card-text">Run free book giveaways with built-in entry management.</p>
+                    <a href="{{ url_for('marketing.list_giveaways') }}" class="btn btn-danger">
+                        <i class="bi bi-trophy"></i> Browse Giveaways
+                    </a>
+                    <a href="{{ url_for('marketing.create_giveaway') }}" class="btn btn-outline-danger mt-2">
+                        Create Giveaway
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Media Sharing -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-share text-info"></i> Social Media Sharing
+                    </h5>
+                    <p class="card-text">One-click share buttons for Facebook, Twitter, Instagram, and WhatsApp.</p>
+                    <p class="text-muted small">Available on each book's detail page</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Widget -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-code-square text-warning"></i> Embeddable Widget
+                    </h5>
+                    <p class="card-text">Get HTML code to embed your book on any website or blog.</p>
+                    <p class="text-muted small">Available on each book's detail page</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Launch Countdown -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-clock text-primary"></i> Launch Countdown
+                    </h5>
+                    <p class="card-text">Display countdown timer for upcoming book releases.</p>
+                    <p class="text-muted small">Available on each book's detail page</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

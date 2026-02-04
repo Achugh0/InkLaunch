@@ -82,7 +82,11 @@
                             </a>
                             {% if book.author %}
                             <br>
-                            <small class="text-muted">by {{ book.author.full_name }}</small>
+                            <small class="text-muted">by 
+                                <a href="{{ url_for('users.get_user', user_id=book.author._id) }}">
+                                    {{ book.author.full_name }}
+                                </a>
+                            </small>
                             {% endif %}
                         </li>
                         {% endfor %}
@@ -105,7 +109,9 @@
                         {% for review in stats.recent_reviews %}
                         <li class="mb-2">
                             {% if review.reviewer %}
-                            {{ review.reviewer.full_name }}
+                            <a href="{{ url_for('users.get_user', user_id=review.reviewer._id) }}">
+                                {{ review.reviewer.full_name }}
+                            </a>
                             {% endif %}
                             reviewed
                             {% if review.book %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Character Name Generator - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-4"><i class="bi bi-person-badge"></i> Character Name Generator</h1>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Culture/Origin</label>
+                                <select class="form-select" name="culture">
+                                    <option value="English" {% if culture == 'English' %}selected{% endif %}>English</option>
+                                    <option value="Fantasy" {% if culture == 'Fantasy' %}selected{% endif %}>Fantasy</option>
+                                    <option value="SciFi" {% if culture == 'SciFi' %}selected{% endif %}>Sci-Fi</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" name="gender">
+                                    <option value="any" {% if gender == 'any' %}selected{% endif %}>Any</option>
+                                    <option value="male" {% if gender == 'male' %}selected{% endif %}>Male</option>
+                                    <option value="female" {% if gender == 'female' %}selected{% endif %}>Female</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Genre</label>
+                                <select class="form-select" name="genre">
+                                    <option value="Fantasy" {% if genre == 'Fantasy' %}selected{% endif %}>Fantasy</option>
+                                    <option value="SciFi" {% if genre == 'SciFi' %}selected{% endif %}>Science Fiction</option>
+                                    <option value="Romance" {% if genre == 'Romance' %}selected{% endif %}>Romance</option>
+                                    <option value="Historical" {% if genre == 'Historical' %}selected{% endif %}>Historical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-shuffle"></i> Generate Names
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if generated_names %}
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-center mb-4">Generated Names</h5>
+                    <div class="row">
+                        {% for name in generated_names %}
+                        <div class="col-md-6 mb-3">
+                            <div class="p-3 bg-light rounded text-center">
+                                <h5 class="mb-0">{{ name }}</h5>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

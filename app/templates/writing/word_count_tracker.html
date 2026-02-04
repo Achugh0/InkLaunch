@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Word Count Tracker - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-bar-chart"></i> Word Count Tracker</h1>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Create New Tracker -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Start New Tracker</h5>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="create">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" name="book_title" 
+                                       placeholder="Book title" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" class="form-control" name="target_word_count" 
+                                       placeholder="Target words" value="50000" required>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="is_public" 
+                                           id="is_public" checked>
+                                    <label class="form-check-label" for="is_public">
+                                        Public
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm mt-2 w-100">Create</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- My Trackers -->
+            <h4 class="mb-3">My Trackers</h4>
+            {% if my_trackers %}
+            {% for tracker in my_trackers %}
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ tracker.book_title }}</h5>
+                    <div class="progress mb-3" style="height: 25px;">
+                        {% set progress = (tracker.current_word_count / tracker.target_word_count * 100) if tracker.target_word_count > 0 else 0 %}
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ progress|round }}%">
+                            {{ tracker.current_word_count|int }} / {{ tracker.target_word_count|int }} words
+                            ({{ progress|round|int }}%)
+                        </div>
+                    </div>
+
+                    <!-- Add Entry Form -->
+                    <form method="POST" class="row g-2">
+                        <input type="hidden" name="action" value="add_entry">
+                        <input type="hidden" name="tracker_id" value="{{ tracker._id }}">
+                        <div class="col-md-4">
+                            <input type="number" class="form-control form-control-sm" name="word_count" 
+                                   placeholder="Current word count" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control form-control-sm" name="notes" 
+                                   placeholder="Notes (optional)">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-sm btn-primary w-100">Update</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i> Last updated: {{ tracker.updated_at.strftime('%b %d, %Y') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No trackers yet. Create one above to start tracking your progress!
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">Community Progress</h6>
+                </div>
+                <div class="card-body">
+                    {% if public_trackers %}
+                    {% for tracker in public_trackers[:5] %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <small><strong>{{ tracker.author.full_name if tracker.author else 'Author' }}</strong></small>
+                            <small class="text-muted">
+                                {% set prog = (tracker.current_word_count / tracker.target_word_count * 100) if tracker.target_word_count > 0 else 0 %}
+                                {{ prog|round|int }}%
+                            </small>
+                        </div>
+                        <div class="text-muted small">{{ tracker.book_title }}</div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar" style="width: {{ prog|round }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted small">No public trackers yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

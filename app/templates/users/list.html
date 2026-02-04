@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Authors - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-3"><i class="fas fa-users"></i> Browse Authors</h1>
+            
+            <!-- Search and Filter Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('users.list_users') }}" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Authors</label>
+                            <input type="text" class="form-control" id="search" name="q" 
+                                   placeholder="Search by name, email, bio..." value="{{ query }}">
+                        </div>
+                        
+                        <div class="col-md-2">

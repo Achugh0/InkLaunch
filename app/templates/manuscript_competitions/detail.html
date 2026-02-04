@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{{ competition.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ competition.title }}</h1>
+            
+            <div class="mb-4">
+                {% for genre in competition.genre_categories %}
+                <span class="badge bg-secondary">{{ genre }}</span>
+                {% endfor %}
+            </div>
+            
+            <div class="lead">{{ competition.description|markdown|safe }}</div>
+            
+            {% if time_remaining %}
+            <div class="alert {% if time_remaining.until_start %}alert-info{% else %}alert-warning{% endif %}">
+                <i class="fas fa-clock"></i> 
+                {% if time_remaining.until_start %}
+                <strong>Opens in:</strong> {{ time_remaining.days }} days, {{ time_remaining.hours }} hours
+                {% else %}
+                <strong>Time Remaining:</strong> {{ time_remaining.days }} days, {{ time_remaining.hours }} hours
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <h4 class="mt-4">Prizes</h4>
+            <ul class="list-unstyled">
+                {% if competition.prize_structure.first_place %}
+                <li><i class="fas fa-trophy text-warning"></i> <strong>1st Place:</strong> {{ competition.prize_structure.first_place }}</li>
+                {% endif %}
+                {% if competition.prize_structure.second_place %}
+                <li><i class="fas fa-medal text-secondary"></i> <strong>2nd Place:</strong> {{ competition.prize_structure.second_place }}</li>
+                {% endif %}
+                {% if competition.prize_structure.third_place %}
+                <li><i class="fas fa-award text-bronze"></i> <strong>3rd Place:</strong> {{ competition.prize_structure.third_place }}</li>
+                {% endif %}
+            </ul>
+            
+            <h4 class="mt-4">Evaluation Criteria</h4>
+            <p>Submissions will be evaluated by AI on the following criteria:</p>
+            <ul>
+                {% for criterion, weight in competition.evaluation_criteria.items() %}
+                <li><strong>{{ criterion.replace('_', ' ').title() }}</strong>: {{ weight }}%</li>
+                {% endfor %}
+            </ul>
+            
+            <h4 class="mt-4">Rules</h4>
+            <ul>
+                <li>Submission window: {{ competition.submission_start_date.strftime('%B %d, %Y') }} - {{ competition.submission_end_date.strftime('%B %d, %Y') }}</li>
+                <li>Maximum {{ competition.max_submissions_per_author }} submission(s) per author</li>
+                <li>Accepted formats: PDF, DOCX, TXT</li>
+                {% if competition.entry_fee_amount > 0 %}
+                <li>Entry fee: ₹{{ competition.entry_fee_amount }}</li>
+                {% else %}
+                <li>Free to enter</li>
+                {% endif %}
+            </ul>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Competition Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Status:</strong>
+                        {% if is_upcoming %}
+                        <span class="badge bg-info">Opening Soon</span>
+                        {% elif competition.status == 'accepting_submissions' %}
+                        <span class="badge bg-success">Open for Submissions</span>
+                        {% elif competition.status == 'completed' %}
+                        <span class="badge bg-dark">Completed</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ competition.status|title }}</span>
+                        {% endif %}
+                    </p>
+                    
+                    <p><strong>Submissions:</strong> {{ submission_count }}</p>
+                    
+                    <p><strong>{% if is_upcoming %}Opens:{% else %}Deadline:{% endif %}</strong><br>
+                    {% if is_upcoming %}
+                    {{ competition.submission_start_date.strftime('%B %d, %Y') }}
+                    {% else %}
+                    {{ competition.submission_end_date.strftime('%B %d, %Y') }}
+                    {% endif %}
+                    </p>
+                    
+                    {% if competition.winner_announcement_date %}
+                    <p><strong>Winner Announcement:</strong><br>
+                    {{ competition.winner_announcement_date.strftime('%B %d, %Y') }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    {% if is_upcoming %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Submissions open on {{ competition.submission_start_date.strftime('%B %d, %Y') }}
+                    </div>
+                    {% elif not session.user_id %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary w-100">
+                        Login to Submit
+                    </a>
+                    {% elif user_submission %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> You've already submitted!
+                    </div>
+                    <p><strong>Your Submission:</strong><br>
+                    {{ user_submission.manuscript_title }}</p>
+                    {% elif competition.status == 'accepting_submissions' %}
+                    <a href="{{ url_for('manuscript_competitions.submit_entry', competition_id=competition._id) }}" 
+                       class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-upload"></i> Submit Entry
+                    </a>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Submissions are currently closed.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Winners Section -->
+    {% if winners %}
+    <div class="mt-5">
+        <h2><i class="fas fa-trophy text-warning"></i> Winners</h2>
+        
+        <div class="row mt-4">
+            {% for winner in winners %}
+            <div class="col-md-4 mb-4">
+                <div class="card border-warning shadow">
+                    <div class="card-header bg-warning">
+                        <h4 class="mb-0">
+                            {% if winner.rank_position == 1 %}
+                            <i class="fas fa-trophy"></i> 1st Place
+                            {% elif winner.rank_position == 2 %}
+                            <i class="fas fa-medal"></i> 2nd Place
+                            {% elif winner.rank_position == 3 %}
+                            <i class="fas fa-award"></i> 3rd Place
+                            {% endif %}
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>{{ winner.submission.manuscript_title }}</h5>
+                        <p><strong>Author:</strong> {{ winner.author.full_name }}</p>
+                        <p><strong>Genre:</strong> <span class="badge bg-secondary">{{ winner.submission.genre }}</span></p>
+                        <p><strong>Prize:</strong> {{ winner.prize_awarded }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

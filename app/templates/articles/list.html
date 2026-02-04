@@ -63,11 +63,14 @@
                 </div>
                 <div class="card-body">
                     <ul class="list-unstyled">
-                        <li><a href="#">Publishing Tips</a></li>
-                        <li><a href="#">Marketing Strategies</a></li>
-                        <li><a href="#">Writing Craft</a></li>
-                        <li><a href="#">Industry News</a></li>
-                        <li><a href="#">Platform Updates</a></li>
+                        <li><a href="{{ url_for('articles.list_articles') }}" {% if not current_category %}class="fw-bold"{% endif %}>All Articles</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Publishing Tips') }}" {% if current_category == 'Publishing Tips' %}class="fw-bold"{% endif %}>Publishing Tips</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Marketing Strategies') }}" {% if current_category == 'Marketing Strategies' %}class="fw-bold"{% endif %}>Marketing Strategies</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Writing Craft') }}" {% if current_category == 'Writing Craft' %}class="fw-bold"{% endif %}>Writing Craft</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Industry News') }}" {% if current_category == 'Industry News' %}class="fw-bold"{% endif %}>Industry News</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Platform Updates') }}" {% if current_category == 'Platform Updates' %}class="fw-bold"{% endif %}>Platform Updates</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Tools & Software') }}" {% if current_category == 'Tools & Software' %}class="fw-bold"{% endif %}>Tools & Software</a></li>
+                        <li><a href="{{ url_for('articles.list_articles', category='Formatting & Design') }}" {% if current_category == 'Formatting & Design' %}class="fw-bold"{% endif %}>Formatting & Design</a></li>
                     </ul>
                 </div>
             </div>

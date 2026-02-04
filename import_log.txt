@@ -1,0 +1,64 @@
+nohup: ignoring input
+/workspaces/InkLaunch/import_sample_users.py:45: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'created_at': datetime.utcnow(),
+/workspaces/InkLaunch/import_sample_users.py:46: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'updated_at': datetime.utcnow(),
+Importing users from: sample_users.csv
+✓ Created user: omar_hassan (Omar Hassan)
+✓ Created user: shilpa_nambiar (Shilpa Nambiar)
+✓ Created user: andrew_campbell (Andrew Campbell)
+✓ Created user: snehal_kulkarni (Snehal Kulkarni)
+✓ Created user: hiroshi_yamamoto (Hiroshi Yamamoto)
+✓ Created user: anjali_mishra (Anjali Mishra)
+✓ Created user: carlos_fernandez (Carlos Fernandez)
+✓ Created user: riya_kapoor (Riya Kapoor)
+✓ Created user: vladimir_sokolov (Vladimir Sokolov)
+✓ Created user: madhuri_deshmukh (Madhuri Deshmukh)
+✓ Created user: james_fraser (James Fraser)
+✓ Created user: neelam_sharma (Neelam Sharma)
+✓ Created user: ahmed_ali (Ahmed Ali)
+✓ Created user: eva_korhonen (Eva Korhonen)
+✓ Created user: akash_pandey (Akash Pandey)
+✓ Created user: gabriella_rossi (Gabriella Rossi)
+✓ Created user: pankaj_tripathi (Pankaj Tripathi)
+✓ Created user: lisa_bergstrom (Lisa Bergstrom)
+✓ Created user: rahul_saxena (Rahul Saxena)
+✓ Created user: sofia_papadopoulos (Sofia Papadopoulos)
+✓ Created user: gaurav_jain (Gaurav Jain)
+✓ Created user: katarina_novak (Katarina Novak)
+✓ Created user: vivek_kumar (Vivek Kumar)
+✓ Created user: ricardo_santos (Ricardo Santos)
+✓ Created user: kaveri_subramaniam (Kaveri Subramaniam)
+✓ Created user: manuel_garcia (Manuel Garcia)
+✓ Created user: poornima_rao (Poornima Rao)
+✓ Created user: heinrich_schmidt (Heinrich Schmidt)
+✓ Created user: tanmay_bose (Tanmay Bose)
+
+============================================================
+IMPORT SUMMARY
+============================================================
+Successfully imported: 29 users
+Failed to import: 65 users
+
+Errors:
+  - Row 2: Username 'priya_sharma' already exists
+  - Row 3: Username 'james_mitchell' already exists
+  - Row 4: Username 'rajesh_kumar' already exists
+  - Row 5: Username 'sophia_anderson' already exists
+  - Row 6: Username 'amit_patel' already exists
+  - Row 7: Username 'emily_chen' already exists
+  - Row 8: Username 'vikram_singh' already exists
+  - Row 9: Username 'maria_garcia' already exists
+  - Row 10: Username 'ananya_reddy' already exists
+  - Row 11: Username 'david_thompson' already exists
+  - Row 12: Username 'sneha_kapoor' already exists
+  - Row 13: Username 'lucas_mueller' already exists
+  - Row 14: Username 'kavita_menon' already exists
+  - Row 15: Username 'olivia_brown' already exists
+  - Row 16: Username 'arjun_mehta' already exists
+  - Row 17: Username 'yuki_tanaka' already exists
+  - Row 18: Username 'deepa_iyer' already exists
+  - Row 19: Username 'marco_rossi' already exists
+  - Row 20: Username 'meera_joshi' already exists
+  - Row 21: Username 'alexander_petrov' already exists
+  ... and 45 more errors

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Manuscript Competitions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-trophy"></i> Writing Competitions</h1>
+            <p class="lead">Submit your manuscript and win prizes! AI-powered judging ensures fair evaluation.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if session.user_id %}
+            <a href="{{ url_for('manuscript_competitions.my_submissions') }}" class="btn btn-outline-primary">
+                <i class="fas fa-file-alt"></i> My Submissions
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Genre Filter -->
+    {% if all_genres %}
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('manuscript_competitions.browse') }}" 
+               class="btn btn-sm {% if not current_genre %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                All Genres
+            </a>
+            {% for genre in all_genres %}
+            <a href="{{ url_for('manuscript_competitions.browse', genre=genre) }}" 
+               class="btn btn-sm {% if current_genre == genre %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {{ genre }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Competitions -->
+    <h3 class="mb-3">Competitions</h3>
+    
+    {% if active_competitions %}
+    <div class="row">
+        {% for comp in active_competitions %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if comp.is_upcoming %}
+                <div class="card-header bg-info text-white">
+                    <small><i class="fas fa-clock"></i> Opens {{ comp.submission_start_date.strftime('%b %d, %Y') }}</small>
+                </div>
+                {% elif comp.is_active %}
+                <div class="card-header bg-success text-white">
+                    <small><i class="fas fa-check-circle"></i> Now Accepting Submissions</small>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ comp.title }}</h5>
+                    <p class="card-text text-muted">{{ comp.description[:150] }}...</p>
+                    
+                    <div class="mb-2">
+                        {% for genre in comp.genre_categories[:3] %}
+                        <span class="badge bg-secondary">{{ genre }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <ul class="list-unstyled small">
+                        <li><i class="fas fa-calendar text-primary"></i> 
+                            {% if comp.is_upcoming %}
+                            Opens: {{ comp.submission_start_date.strftime('%b %d, %Y') }}
+                            {% else %}
+                            Deadline: {{ comp.submission_end_date.strftime('%b %d, %Y') }}
+                            {% endif %}
+                        </li>
+                        <li><i class="fas fa-users text-info"></i> {{ comp.submission_count }} submissions</li>
+                        <li><i class="fas fa-tag text-success"></i> 
+                            {% if comp.entry_fee_amount > 0 %}
+                            Entry: ₹{{ comp.entry_fee_amount }}
+                            {% else %}
+                            Free to enter
+                            {% endif %}
+                        </li>
+                        <li><i class="fas fa-trophy text-warning"></i> {{ comp.prize_structure.first_place[:50] }}...</li>
+                    </ul>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('manuscript_competitions.detail', competition_id=comp._id) }}" 
+                       class="btn btn-primary btn-sm w-100">
+                        {% if comp.is_upcoming %}
+                        View Details
+                        {% else %}
+                        View Details & Submit
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No active competitions at the moment. Check back soon!
+    </div>
+    {% endif %}
+
+    <!-- Past Winners -->
+    {% if completed_competitions %}
+    <h3 class="mt-5 mb-3">Recent Winners</h3>
+    <div class="row">
+        {% for comp in completed_competitions %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{{ comp.title }}</h6>
+                    <small class="text-muted">Completed</small>
+                    <div class="mt-2">
+                        <a href="{{ url_for('manuscript_competitions.detail', competition_id=comp._id) }}" 
+                           class="btn btn-sm btn-outline-secondary">
+                            View Winners
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

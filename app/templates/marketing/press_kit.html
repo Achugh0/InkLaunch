@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Press Kit - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-file-earmark-text"></i> Press Kit Generator</h1>
+    
+    {% if press_kit %}
+    <div class="alert alert-success">
+        <i class="bi bi-check-circle"></i> Your press kit is ready!
+        <a href="{{ url_for('marketing.download_press_kit', press_kit_id=press_kit._id) }}" class="btn btn-sm btn-success ms-2">
+            <i class="bi bi-download"></i> Download
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Generate Your Press Kit</h5>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Author Bio</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="6" required>{{ user.bio or '' }}</textarea>
+                            <div class="form-text">Write a professional bio about yourself (200-500 words)</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="headshot_url" class="form-label">Headshot URL</label>
+                            <input type="url" class="form-control" id="headshot_url" name="headshot_url" 
+                                   value="{{ user.profile_image_url or '' }}">
+                            <div class="form-text">URL to your professional headshot</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6>Book Covers</h6>
+                            {% if books %}
+                            <div class="row">
+                                {% for book in books %}
+                                <div class="col-md-3 mb-3">
+                                    <img src="{{ book.cover_image_url or '/static/images/default-book-cover.png' }}" 
+                                         class="img-fluid rounded" alt="{{ book.title }}">
+                                    <small class="d-block text-center mt-1">{{ book.title }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted">No books added yet. Add books to include their covers in your press kit.</p>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> {% if press_kit %}Update{% else %}Generate{% endif %} Press Kit
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h6 class="card-title">What's Included?</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Professional author bio</li>
+                        <li><i class="bi bi-check-circle text-success"></i> High-quality headshot</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Book cover images</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Awards & achievements</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Contact information</li>
+                        <li><i class="bi bi-check-circle text-success"></i> Download as PDF</li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if press_kit %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h6 class="card-title">Stats</h6>
+                    <p class="mb-1"><strong>Downloads:</strong> {{ press_kit.download_count }}</p>
+                    <p class="mb-1"><strong>Last Updated:</strong> {{ press_kit.updated_at.strftime('%B %d, %Y') }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

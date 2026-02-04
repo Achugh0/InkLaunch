@@ -1,9 +1,12 @@
 """Admin routes."""
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, flash
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, flash, send_file
 from app.models import User, Book, Review, CompetitionPeriod, Nomination
 from app import mongo, bcrypt
 from bson import ObjectId
 from datetime import datetime
+import csv
+import io
+from werkzeug.utils import secure_filename
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -296,3 +299,126 @@ def system_stats():
     
     return render_template('admin/system_stats.html', stats=stats)
 
+
+@bp.route('/users/bulk-import', methods=['GET', 'POST'])
+def bulk_import_users():
+    """Bulk import users from CSV."""
+    if not require_admin():
+        flash('Admin access required', 'error')
+        return redirect(url_for('main.index'))
+    
+    if request.method == 'POST':
+        # Check if file was uploaded
+        if 'csv_file' not in request.files:
+            flash('No file uploaded', 'error')
+            return redirect(request.url)
+        
+        file = request.files['csv_file']
+        
+        if file.filename == '':
+            flash('No file selected', 'error')
+            return redirect(request.url)
+        
+        if not file.filename.endswith('.csv'):
+            flash('Please upload a CSV file', 'error')
+            return redirect(request.url)
+        
+        try:
+            # Read CSV file
+            stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+            csv_reader = csv.DictReader(stream)
+            
+            success_count = 0
+            error_count = 0
+            errors = []
+            
+            for row_num, row in enumerate(csv_reader, start=2):  # Start at 2 to account for header
+                try:
+                    # Validate required fields
+                    required_fields = ['user_id', 'email', 'Full_name', 'password']
+                    missing_fields = [field for field in required_fields if not row.get(field)]
+                    
+                    if missing_fields:
+                        errors.append(f"Row {row_num}: Missing required fields: {', '.join(missing_fields)}")
+                        error_count += 1
+                        continue
+                    
+                    # Check if user already exists
+                    existing_user = User.find_by_username(row['user_id'])
+                    if existing_user:
+                        errors.append(f"Row {row_num}: Username '{row['user_id']}' already exists")
+                        error_count += 1
+                        continue
+                    
+                    existing_email = User.find_by_email(row['email'])
+                    if existing_email:
+                        errors.append(f"Row {row_num}: Email '{row['email']}' already exists")
+                        error_count += 1
+                        continue
+                    
+                    # Create user
+                    user_data = {
+                        'username': row['user_id'],
+                        'email': row['email'],
+                        'full_name': row['Full_name'],
+                        'password_hash': bcrypt.generate_password_hash(row['password']).decode('utf-8'),
+                        'role': row.get('role', 'user').lower(),
+                        'status': row.get('status', 'active').lower(),
+                        'bio': row.get('BIO', ''),
+                        'created_at': datetime.utcnow(),
+                        'updated_at': datetime.utcnow(),
+                        'profile_image': None,
+                        'social_links': {},
+                        'preferences': {},
+                        'badges': []
+                    }
+                    
+                    mongo.db.users.insert_one(user_data)
+                    success_count += 1
+                    
+                except Exception as e:
+                    errors.append(f"Row {row_num}: {str(e)}")
+                    error_count += 1
+            
+            # Show results
+            if success_count > 0:
+                flash(f'Successfully imported {success_count} users', 'success')
+            
+            if error_count > 0:
+                flash(f'Failed to import {error_count} users', 'warning')
+                for error in errors[:10]:  # Show first 10 errors
+                    flash(error, 'error')
+                if len(errors) > 10:
+                    flash(f'... and {len(errors) - 10} more errors', 'error')
+            
+            return redirect(url_for('admin.list_users'))
+            
+        except Exception as e:
+            flash(f'Error processing CSV file: {str(e)}', 'error')
+            return redirect(request.url)
+    
+    # GET request - show upload form
+    return render_template('admin/bulk_import_users.html')
+
+
+@bp.route('/users/download-sample-csv')
+def download_sample_csv():
+    """Download sample CSV file for bulk import."""
+    if not require_admin():
+        flash('Admin access required', 'error')
+        return redirect(url_for('main.index'))
+    
+    try:
+        # Path to sample CSV file
+        import os
+        sample_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'sample_users.csv')
+        
+        return send_file(
+            sample_file,
+            mimetype='text/csv',
+            as_attachment=True,
+            download_name='sample_users.csv'
+        )
+    except Exception as e:
+        flash(f'Error downloading sample file: {str(e)}', 'error')
+        return redirect(url_for('admin.list_users'))

@@ -4,59 +4,221 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-3">
+    <!-- Author Header -->
+    <div class="row mb-4">
+        <div class="col-md-3 text-center">
             {% if user.profile_image_url %}
-            <img src="{{ user.profile_image_url }}" class="img-fluid rounded-circle" alt="{{ user.full_name }}">
+            <img src="{{ user.profile_image_url }}" class="img-fluid rounded-circle shadow" alt="{{ user.full_name }}" style="width: 200px; height: 200px; object-fit: cover;">
             {% else %}
-            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-circle" style="width: 200px; height: 200px;">
+            <div class="bg-gradient text-white d-flex align-items-center justify-content-center rounded-circle mx-auto shadow" 
+                 style="width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <i class="bi bi-person" style="font-size: 5rem;"></i>
+            </div>
+            {% endif %}
+            
+            {% if is_featured %}
+            <div class="mt-3">
+                <span class="badge bg-warning text-dark p-2">
+                    <i class="fas fa-star"></i> Featured Author
+                </span>
+            </div>
+            {% endif %}
+            
+            {% if is_premium %}
+            <div class="mt-2">
+                <span class="badge bg-info p-2">
+                    <i class="fas fa-crown"></i> Premium Member
+                </span>
             </div>
             {% endif %}
         </div>
         
         <div class="col-md-9">
-            <h1>{{ user.full_name }}</h1>
+            <h1 class="display-4">{{ user.full_name }}</h1>
             {% if user.bio %}
             <p class="lead">{{ user.bio }}</p>
+            {% else %}
+            <p class="text-muted">This author hasn't written a bio yet.</p>
             {% endif %}
             
-            <div class="mb-3">
-                <span class="badge bg-primary">{{ books_count }} Books</span>
-                <span class="badge bg-info">{{ reviews_count }} Reviews</span>
-                {% if user.total_wins > 0 %}
-                <span class="badge bg-warning">{{ user.total_wins }} Competition Wins</span>
-                {% endif %}
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-6 col-md-3 text-center mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="text-primary mb-0">{{ books|length }}</h3>
+                            <small class="text-muted">Books</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="text-success mb-0">{{ competition_stats.total_wins }}</h3>
+                            <small class="text-muted">Competition Wins</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="text-info mb-0">{{ competition_stats.total_submissions }}</h3>
+                            <small class="text-muted">Submissions</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 text-center mb-3">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h3 class="text-warning mb-0">{{ badges|length }}</h3>
+                            <small class="text-muted">Badges</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <hr class="my-5">
-    
-    <h3>Published Books</h3>
-    
-    {% if books %}
-    <div class="row">
-        {% for book in books %}
-        <div class="col-md-3 col-sm-6 mb-4">
-            <div class="card book-card h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'">
-                {% if book.cover_image_url %}
-                <img src="{{ book.cover_image_url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="{{ book.title }}">
-                {% else %}
-                <div class="bg-secondary" style="height: 250px; display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-book text-white" style="font-size: 3rem;"></i>
+    <!-- Badges & Achievements Section -->
+    {% if badges %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0"><i class="fas fa-trophy"></i> Badges & Achievements</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for badge in badges %}
+                <div class="col-md-4 col-sm-6 mb-3">
+                    <div class="card h-100 border-0 bg-light">
+                        <div class="card-body text-center">
+                            <div style="font-size: 3rem;" class="mb-2">{{ badge.icon }}</div>
+                            <h5 class="card-title">{{ badge.name }}</h5>
+                            <p class="card-text text-muted small">
+                                {% if badge.type == 'competition_winner' %}
+                                Competition Winner
+                                {% elif badge.type == 'competition_finalist' %}
+                                Competition Finalist
+                                {% else %}
+                                Achievement
+                                {% endif %}
+                            </p>
+                            <small class="text-muted">
+                                Earned: {{ badge.earned_date.strftime('%b %d, %Y') }}
+                            </small>
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ book.title }}</h5>
-                    <p class="card-text"><small class="text-muted">{{ book.genre }}</small></p>
-                </div>
+                {% endfor %}
             </div>
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <p class="text-muted">No books published yet.</p>
     {% endif %}
+    
+    <!-- Competition History -->
+    {% if competition_stats.total_entered > 0 %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-chart-line"></i> Competition History</h4>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-3 mb-3">
+                    <h3 class="text-primary">{{ competition_stats.total_entered }}</h3>
+                    <p class="text-muted mb-0">Competitions Entered</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h3 class="text-success">{{ competition_stats.total_wins }}</h3>
+                    <p class="text-muted mb-0">Total Wins</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <h3 class="text-info">{{ competition_stats.total_finalist }}</h3>
+                    <p class="text-muted mb-0">Finalist Placements</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    {% if competition_stats.best_rank %}
+                    <h3 class="text-warning">
+                        {% if competition_stats.best_rank == 1 %}🥇
+                        {% elif competition_stats.best_rank == 2 %}🥈
+                        {% elif competition_stats.best_rank == 3 %}🥉
+                        {% endif %}
+                    </h3>
+                    <p class="text-muted mb-0">Best Rank</p>
+                    {% else %}
+                    <h3 class="text-muted">-</h3>
+                    <p class="text-muted mb-0">Best Rank</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if recent_submissions %}
+            <hr>
+            <h5 class="mb-3">Recent Competition Submissions</h5>
+            <div class="list-group">
+                {% for submission in recent_submissions[:5] %}
+                <a href="{{ url_for('manuscript_competitions.detail', competition_id=submission.competition._id) }}" 
+                   class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ submission.manuscript_title }}</h6>
+                        <small class="text-muted">{{ submission.submitted_at.strftime('%b %d, %Y') }}</small>
+                    </div>
+                    <p class="mb-1 text-muted small">{{ submission.competition.title }}</p>
+                    {% if submission.final_rank %}
+                    <span class="badge bg-success">
+                        {% if submission.final_rank == 1 %}🥇 1st Place
+                        {% elif submission.final_rank == 2 %}🥈 2nd Place
+                        {% elif submission.final_rank == 3 %}🥉 3rd Place
+                        {% else %}Finalist
+                        {% endif %}
+                    </span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Published Books Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-book"></i> Published Books ({{ books|length }})</h4>
+        </div>
+        <div class="card-body">
+            {% if books %}
+            <div class="row">
+                {% for book in books %}
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card book-card h-100 shadow-sm" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'" style="cursor: pointer;">
+                        {% if book.cover_image_url %}
+                        <img src="{{ book.cover_image_url }}" class="card-img-top" style="height: 300px; object-fit: cover;" alt="{{ book.title }}">
+                        {% else %}
+                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
+                            <i class="bi bi-book" style="font-size: 4rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <p class="card-text">
+                                <span class="badge bg-secondary">{{ book.genre }}</span>
+                            </p>
+                            {% if book.is_award_winner %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-trophy"></i> Award Winner
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-book text-muted" style="font-size: 4rem;"></i>
+                <p class="text-muted mt-3">No books published yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

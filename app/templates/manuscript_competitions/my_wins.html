@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}My Wins - Competitions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="fas fa-trophy text-warning"></i> My Competition Wins</h1>
+    
+    {% if wins %}
+    <div class="row mt-4">
+        {% for win in wins %}
+        <div class="col-md-6 mb-4">
+            <div class="card border-warning shadow">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        {% if win.rank_position == 1 %}
+                        🥇 1st Place Winner
+                        {% elif win.rank_position == 2 %}
+                        🥈 2nd Place Winner
+                        {% elif win.rank_position == 3 %}
+                        🥉 3rd Place Winner
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>{{ win.submission.manuscript_title }}</h6>
+                    
+                    <p><strong>Competition:</strong> 
+                        <a href="{{ url_for('manuscript_competitions.detail', competition_id=win.competition._id) }}">
+                            {{ win.competition.title }}
+                        </a>
+                    </p>
+                    
+                    <p><strong>Score:</strong> <span class="badge bg-primary">{{ "%.1f"|format(win.final_score) }}/10</span></p>
+                    
+                    <p><strong>Prize:</strong> {{ win.prize_awarded }}</p>
+                    
+                    <p><strong>Announced:</strong> {{ win.announced_at.strftime('%B %d, %Y') }}</p>
+                    
+                    {% if win.winner_feedback %}
+                    <hr>
+                    <details>
+                        <summary class="text-primary" style="cursor: pointer;"><strong>View Detailed Feedback</strong></summary>
+                        <div class="mt-3 p-3 bg-light rounded">
+                            {{ win.winner_feedback }}
+                        </div>
+                    </details>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle"></i> You haven't won any competitions yet. Keep writing!
+        <a href="{{ url_for('manuscript_competitions.browse') }}">Browse active competitions</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

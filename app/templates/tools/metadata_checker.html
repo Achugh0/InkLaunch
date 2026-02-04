@@ -1,80 +1,353 @@
 {% extends "base.html" %}
 
-{% block title %}Metadata Checker - InkLaunch{% endblock %}
+{% block title %}Enhanced Metadata Checker - InkLaunch{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Metadata Checker</h1>
-    
     <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body">
-                    <p class="text-muted">Validate and optimize your book metadata for better discoverability</p>
-                    
-                    <form method="POST" action="{{ url_for('tools.metadata_checker') }}">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">Book Title</label>
-                            <input type="text" class="form-control" id="title" name="title" value="{{ title or '' }}" required>
-                            <small class="form-text text-muted">Optimal: 60-80 characters</small>
+        <div class="col-lg-10 mx-auto">
+            <h1 class="mb-4">
+                <i class="bi bi-file-earmark-check"></i> Enhanced Metadata Checker
+            </h1>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Upload your EPUB file for comprehensive metadata analysis, or manually enter your book details. Get platform-specific recommendations for Amazon KDP, Apple Books, Kobo, and more.
+            </div>
+
+            <!-- Tabs for Upload vs Manual Entry -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button">
+                        <i class="bi bi-upload"></i> Upload EPUB
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button">
+                        <i class="bi bi-pencil-square"></i> Manual Entry
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- EPUB Upload Tab -->
+                <div class="tab-pane fade show active" id="upload" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Upload Your EPUB File</h5>
+                            <p class="text-muted">We'll analyze your book's metadata and provide detailed recommendations.</p>
+                            
+                            <form method="POST" enctype="multipart/form-data" action="{{ url_for('tools.metadata_checker') }}">
+                                <div class="mb-3">
+                                    <label for="epub_file" class="form-label fw-bold">Select EPUB File</label>
+                                    <input type="file" class="form-control" id="epub_file" name="epub_file" accept=".epub" required>
+                                    <small class="text-muted">Maximum file size: 50MB</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-search"></i> Analyze EPUB Metadata
+                                </button>
+                            </form>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Book Description</label>
-                            <textarea class="form-control" id="description" name="description" rows="6" required>{{ description or '' }}</textarea>
-                            <small class="form-text text-muted">Minimum: 150 characters recommended</small>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary">Check Metadata</button>
-                        <a href="{{ url_for('tools.list_tools') }}" class="btn btn-secondary">Back to Tools</a>
-                    </form>
-                    
-                    {% if results %}
-                    <hr class="my-4">
-                    <h4>Results</h4>
-                    
-                    <div class="alert alert-{{ 'success' if results.title_optimal and results.description_optimal else 'warning' }}">
-                        <h5>Title Analysis</h5>
-                        <p><strong>Length:</strong> {{ results.title_length }} characters
-                            {% if results.title_optimal %}✓{% else %}✗{% endif %}
-                        </p>
-                        
-                        <h5>Description Analysis</h5>
-                        <p><strong>Length:</strong> {{ results.description_length }} characters
-                            {% if results.description_optimal %}✓{% else %}✗{% endif %}
-                        </p>
-                        
-                        <h5>Recommendations</h5>
-                        <ul>
-                            {% for rec in results.recommendations %}
-                            <li>{{ rec }}</li>
-                            {% endfor %}
-                        </ul>
                     </div>
-                    {% endif %}
+                </div>
+
+                <!-- Manual Entry Tab -->
+                <div class="tab-pane fade" id="manual" role="tabpanel">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Enter Book Details Manually</h5>
+                            
+                            <form method="POST" action="{{ url_for('tools.metadata_checker') }}">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label fw-bold">Book Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                    <small class="text-muted">Optimal: 30-80 characters</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="author" class="form-label fw-bold">Author Name *</label>
+                                    <input type="text" class="form-control" id="author" name="author" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="description" class="form-label fw-bold">Book Description *</label>
+                                    <textarea class="form-control" id="description" name="description" rows="6" required></textarea>
+                                    <small class="text-muted">Recommended: 300-500 characters minimum</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="keywords" class="form-label fw-bold">Keywords</label>
+                                    <input type="text" class="form-control" id="keywords" name="keywords" placeholder="thriller, mystery, suspense, psychological">
+                                    <small class="text-muted">Separate keywords with commas (Amazon allows 7)</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="categories" class="form-label fw-bold">Categories</label>
+                                    <input type="text" class="form-control" id="categories" name="categories" placeholder="Fiction > Thriller, Fiction > Mystery">
+                                    <small class="text-muted">Separate categories with commas</small>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-check-circle"></i> Check Metadata
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5>Tips</h5>
+
+            {% if report %}
+            <!-- Results Section -->
+            <div class="mt-5">
+                <div class="card shadow-lg border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-clipboard-data"></i> Metadata Analysis Report
+                            {% if report.file_uploaded %}
+                            <small class="float-end">File: {{ report.filename }}</small>
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Overall Score -->
+                        {% if report.scores %}
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="card {% if report.scores.percentage >= 80 %}bg-success{% elif report.scores.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %} text-white text-center">
+                                    <div class="card-body">
+                                        <h2 class="display-3 mb-0">{{ report.scores.percentage }}%</h2>
+                                        <h4>Overall Metadata Score: Grade {{ report.scores.grade }}</h4>
+                                        <p class="mb-0">{{ report.scores.total }} out of {{ report.scores.max }} points</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Metadata Summary -->
+                        {% if report.metadata %}
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="bi bi-book"></i> Your Book's Metadata</h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th width="25%">Title:</th>
+                                        <td>{{ report.metadata.title or '(Not provided)' }}
+                                            {% if report.metadata.title_length %}
+                                            <span class="badge bg-secondary">{{ report.metadata.title_length }} characters</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Author:</th>
+                                        <td>{{ report.metadata.author or '(Not provided)' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Description:</th>
+                                        <td>
+                                            {{ report.metadata.description[:200] or '(Not provided)' }}
+                                            {% if report.metadata.description and report.metadata.description|length > 200 %}...{% endif %}
+                                            {% if report.metadata.description_length %}
+                                            <br><span class="badge bg-secondary">{{ report.metadata.description_length }} characters</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if report.metadata.keywords %}
+                                    <tr>
+                                        <th>Keywords:</th>
+                                        <td>{{ report.metadata.keywords }}
+                                            {% if report.metadata.keyword_count %}
+                                            <span class="badge bg-info">{{ report.metadata.keyword_count }} keywords</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if report.metadata.language %}
+                                    <tr>
+                                        <th>Language:</th>
+                                        <td>{{ report.metadata.language }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if report.metadata.isbn %}
+                                    <tr>
+                                        <th>ISBN:</th>
+                                        <td>{{ report.metadata.isbn }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Issues (Critical Problems) -->
+                        {% if report.issues %}
+                        <div class="alert alert-danger">
+                            <h5><i class="bi bi-exclamation-triangle-fill"></i> Critical Issues (Must Fix)</h5>
+                            <ul class="mb-0">
+                                {% for issue in report.issues %}
+                                <li><strong>{{ issue }}</strong></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Warnings (Should Fix) -->
+                        {% if report.warnings %}
+                        <div class="alert alert-warning">
+                            <h5><i class="bi bi-exclamation-circle-fill"></i> Warnings (Recommended to Fix)</h5>
+                            <ul class="mb-0">
+                                {% for warning in report.warnings %}
+                                <li>{{ warning }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Successes (What's Good) -->
+                        {% if report.successes %}
+                        <div class="alert alert-success">
+                            <h5><i class="bi bi-check-circle-fill"></i> What's Working Well</h5>
+                            <ul class="mb-0">
+                                {% for success in report.successes %}
+                                <li>{{ success }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Recommendations -->
+                        {% if report.recommendations %}
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-lightbulb-fill"></i> Recommendations for Improvement</h5>
+                            <ul class="mb-0">
+                                {% for rec in report.recommendations %}
+                                <li>{{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <!-- Platform-Specific Tips -->
+                        {% if report.platform_tips %}
+                        <div class="mt-4">
+                            <h4 class="mb-3"><i class="bi bi-shop"></i> Platform-Specific Tips</h4>
+                            
+                            <div class="accordion" id="platformAccordion">
+                                <!-- Amazon KDP -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#amazonTips">
+                                            Amazon KDP (Kindle Direct Publishing)
+                                        </button>
+                                    </h2>
+                                    <div id="amazonTips" class="accordion-collapse collapse show" data-bs-parent="#platformAccordion">
+                                        <div class="accordion-body">
+                                            <ul>
+                                                {% for tip in report.platform_tips.amazon_kdp %}
+                                                <li>{{ tip }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Apple Books -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#appleTips">
+                                            Apple Books
+                                        </button>
+                                    </h2>
+                                    <div id="appleTips" class="accordion-collapse collapse" data-bs-parent="#platformAccordion">
+                                        <div class="accordion-body">
+                                            <ul>
+                                                {% for tip in report.platform_tips.apple_books %}
+                                                <li>{{ tip }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Kobo -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#koboTips">
+                                            Kobo
+                                        </button>
+                                    </h2>
+                                    <div id="koboTips" class="accordion-collapse collapse" data-bs-parent="#platformAccordion">
+                                        <div class="accordion-body">
+                                            <ul>
+                                                {% for tip in report.platform_tips.kobo %}
+                                                <li>{{ tip }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- General Tips -->
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#generalTips">
+                                            General Publishing Tips
+                                        </button>
+                                    </h2>
+                                    <div id="generalTips" class="accordion-collapse collapse" data-bs-parent="#platformAccordion">
+                                        <div class="accordion-body">
+                                            <ul>
+                                                {% for tip in report.platform_tips.general %}
+                                                <li>{{ tip }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4 text-center">
+                            <a href="{{ url_for('tools.metadata_checker') }}" class="btn btn-primary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Check Another Book
+                            </a>
+                            <button class="btn btn-outline-secondary" onclick="window.print()">
+                                <i class="bi bi-printer"></i> Print Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-question-circle"></i> About This Tool</h5>
                 </div>
                 <div class="card-body">
-                    <h6>Title</h6>
-                    <ul class="small">
-                        <li>Keep it 60-80 characters</li>
-                        <li>Include main keywords</li>
-                        <li>Be descriptive and catchy</li>
+                    <h6>What This Tool Checks:</h6>
+                    <ul>
+                        <li><strong>Title:</strong> Length, formatting, and optimization</li>
+                        <li><strong>Description:</strong> Length, engagement, and SEO</li>
+                        <li><strong>Keywords:</strong> Count and relevance</li>
+                        <li><strong>Author Information:</strong> Completeness</li>
+                        <li><strong>Language & ISBN:</strong> Proper formatting</li>
+                        <li><strong>Platform Requirements:</strong> Amazon KDP, Apple Books, Kobo compatibility</li>
                     </ul>
                     
-                    <h6>Description</h6>
-                    <ul class="small">
-                        <li>Minimum 150 characters</li>
-                        <li>Include relevant keywords</li>
-                        <li>Highlight unique selling points</li>
-                        <li>Target your audience</li>
+                    <h6 class="mt-3">Why Metadata Matters:</h6>
+                    <p>Good metadata helps readers find your book through search, improves your rankings on retailer sites, and increases your conversion rate from browsers to buyers. Proper metadata is the foundation of book marketing.</p>
+                    
+                    <h6 class="mt-3">Related Resources:</h6>
+                    <ul>
+                        <li><a href="{{ url_for('articles.list_articles') }}">Browse Publishing Articles</a></li>
+                        <li><a href="{{ url_for('tools.cover_designer') }}">Cover Size Calculator</a></li>
+                        <li><a href="{{ url_for('tools.isbn_validator') }}">ISBN Validator</a></li>
                     </ul>
                 </div>
             </div>

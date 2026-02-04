@@ -9,10 +9,16 @@ bp = Blueprint('articles', __name__, url_prefix='/articles')
 def list_articles():
     """List all published articles."""
     page = request.args.get('page', 1, type=int)
+    category = request.args.get('category', None)
     per_page = 20
     
     skip = (page - 1) * per_page
-    articles = Article.find_published(skip=skip, limit=per_page)
+    
+    # Filter by category if provided
+    if category:
+        articles = Article.find_by_category(category, skip=skip, limit=per_page)
+    else:
+        articles = Article.find_published(skip=skip, limit=per_page)
     
     # Enrich with author info
     for article in articles:
@@ -31,7 +37,7 @@ def list_articles():
             } for a in articles]
         }), 200
     
-    return render_template('articles/list.html', articles=articles)
+    return render_template('articles/list.html', articles=articles, current_category=category)
 
 
 @bp.route('/<slug>')

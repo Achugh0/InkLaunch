@@ -31,7 +31,7 @@
                 {% endif %}
                 
                 <div class="article-content">
-                    {{ article.content|safe }}
+                    {{ article.content|markdown|safe }}
                 </div>
             </article>
             

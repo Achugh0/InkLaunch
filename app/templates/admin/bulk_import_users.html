@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Import Users - InkLaunch Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Bulk Import Users</h2>
+                <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Users
+                </a>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle"></i> Instructions
+                </div>
+                <div class="card-body">
+                    <h5>How to use Bulk Import</h5>
+                    <ol>
+                        <li>Download the sample CSV file template below</li>
+                        <li>Fill in your user data following the format in the sample file</li>
+                        <li>Make sure all required fields are filled: <code>user_id</code>, <code>email</code>, <code>Full_name</code>, <code>password</code></li>
+                        <li>Upload your completed CSV file using the form below</li>
+                    </ol>
+                    
+                    <h5 class="mt-4">CSV Format Requirements</h5>
+                    <ul>
+                        <li><strong>user_id:</strong> Unique username (no spaces)</li>
+                        <li><strong>email:</strong> Valid email address (must be unique)</li>
+                        <li><strong>Full_name:</strong> User's full name</li>
+                        <li><strong>password:</strong> User's password (will be encrypted)</li>
+                        <li><strong>role:</strong> User role (optional, default: "User"). Valid values: User, Admin</li>
+                        <li><strong>status:</strong> Account status (optional, default: "active"). Valid values: active, inactive, suspended</li>
+                        <li><strong>BIO:</strong> User biography (optional)</li>
+                    </ul>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Note:</strong> Users with duplicate usernames or emails will be skipped. Make sure your CSV has unique values for these fields.
+                    </div>
+
+                    <a href="{{ url_for('admin.download_sample_csv') }}" class="btn btn-success mt-3">
+                        <i class="fas fa-download"></i> Download Sample CSV (100 Users)
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-upload"></i> Upload CSV File
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="csv_file" class="form-label">Select CSV File</label>
+                            <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                            <div class="form-text">Please upload a CSV file with user data</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-file-import"></i> Import Users
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-code"></i> Sample CSV Format Preview
+                </div>
+                <div class="card-body">
+                    <pre class="bg-light p-3" style="overflow-x: auto;">user_id,email,Full_name,role,status,password,BIO
+priya_sharma,priya.sharma@inklaunch.in,Priya Sharma,User,active,SecurePass123,"Award-winning romance novelist from Mumbai"
+james_mitchell,james.mitchell@writemail.com,James Mitchell,User,active,SecurePass456,"British thriller writer specializing in espionage"</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

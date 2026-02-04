@@ -4,7 +4,6 @@ from app.models import User
 from app import mongo
 from bson import ObjectId
 from datetime import datetime
-from flask_login import login_required, current_user
 
 bp = Blueprint('services', __name__, url_prefix='/services')
 
@@ -208,9 +207,13 @@ def service_detail(service_id):
 
 
 @bp.route('/<service_id>/request', methods=['GET', 'POST'])
-@login_required
 def request_service(service_id):
     """Request a paid service."""
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash('Please login to request services.', 'error')
+        return redirect(url_for('auth.login'))
+    
     service = SERVICES_CATALOG.get(service_id)
     if not service:
         flash('Service not found.', 'error')
@@ -245,9 +248,13 @@ def request_service(service_id):
 
 
 @bp.route('/my-requests')
-@login_required
 def my_requests():
     """View user's service requests."""
+    # Check if user is logged in
+    if 'user_id' not in session:
+        flash('Please login to view your requests.', 'error')
+        return redirect(url_for('auth.login'))
+    
     try:
         requests_list = list(mongo.db.service_requests.find({
             'user_id': ObjectId(session['user_id'])

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Create Competition - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4"><i class="fas fa-plus-circle"></i> Create New Competition</h1>
+
+    <form method="POST" action="{{ url_for('competitions_admin.create_competition') }}">
+        <!-- Basic Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Basic Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Competition Title *</label>
+                    <input type="text" class="form-control" id="title" name="title" required
+                           placeholder="e.g., Spring 2026 Fiction Writing Competition">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control" id="description" name="description" rows="5" required
+                              placeholder="Detailed description of the competition, what authors can win, who can participate, etc."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Genre Categories *</label>
+                    <div class="row">
+                        {% for genre in genres %}
+                        <div class="col-md-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="genre_categories" 
+                                       value="{{ genre }}" id="genre_{{ loop.index }}">
+                                <label class="form-check-label" for="genre_{{ loop.index }}">
+                                    {{ genre }}
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Settings -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Submission Settings</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="submission_start_date" class="form-label">Submission Start Date *</label>
+                        <input type="date" class="form-control" id="submission_start_date" 
+                               name="submission_start_date" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="submission_end_date" class="form-label">Submission End Date *</label>
+                        <input type="date" class="form-control" id="submission_end_date" 
+                               name="submission_end_date" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="winner_announcement_date" class="form-label">Winner Announcement Date</label>
+                        <input type="date" class="form-control" id="winner_announcement_date" 
+                               name="winner_announcement_date">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="max_submissions_per_author" class="form-label">Max Submissions Per Author *</label>
+                        <input type="number" class="form-control" id="max_submissions_per_author" 
+                               name="max_submissions_per_author" value="1" min="1" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="entry_fee_amount" class="form-label">Entry Fee Amount (₹) *</label>
+                        <input type="number" class="form-control" id="entry_fee_amount" 
+                               name="entry_fee_amount" value="0" min="0" step="0.01" required>
+                        <small class="text-muted">Set to 0 for free competition</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluation Criteria -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">AI Evaluation Criteria (Weights must total 100%)</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="weight_plot" class="form-label">Plot/Story Structure</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="weight_plot" 
+                                   name="weight_plot" value="25" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="weight_character" class="form-label">Character Development</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="weight_character" 
+                                   name="weight_character" value="25" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="weight_writing" class="form-label">Writing Quality/Style</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="weight_writing" 
+                                   name="weight_writing" value="25" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="weight_originality" class="form-label">Originality/Creativity</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="weight_originality" 
+                                   name="weight_originality" value="25" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prize Structure -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">Prize Structure</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="prize_first" class="form-label">First Place Prize</label>
+                    <input type="text" class="form-control" id="prize_first" name="prize_first"
+                           placeholder="e.g., ₹10,000 cash prize + Featured placement">
+                </div>
+                <div class="mb-3">
+                    <label for="prize_second" class="form-label">Second Place Prize</label>
+                    <input type="text" class="form-control" id="prize_second" name="prize_second"
+                           placeholder="e.g., ₹5,000 cash prize">
+                </div>
+                <div class="mb-3">
+                    <label for="prize_third" class="form-label">Third Place Prize</label>
+                    <input type="text" class="form-control" id="prize_third" name="prize_third"
+                           placeholder="e.g., ₹2,000 cash prize">
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Create Competition (Save as Draft)
+            </button>
+            <a href="{{ url_for('competitions_admin.list_competitions') }}" class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

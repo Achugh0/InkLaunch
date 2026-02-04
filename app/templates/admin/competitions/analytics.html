@@ -1,0 +1,863 @@
+{% extends "base.html" %}
+
+{% block title %}Competition Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header with Actions -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-chart-line"></i> Competition Analytics Dashboard</h1>
+            <p class="text-muted">Advanced insights and statistics for all competitions</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="exportToCSV()">
+                    <i class="fas fa-file-csv"></i> Export CSV
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+            <br><br>
+            <a href="{{ url_for('competitions_admin.list_competitions') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Competitions
+            </a>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Users</h6>
+                            <h2 class="mb-0">{{ total_users }}</h2>
+                            <small>
+                                {% if user_growth_rate > 0 %}
+                                <i class="fas fa-arrow-up"></i> {{ "%.1f"|format(user_growth_rate) }}% growth
+                                {% elif user_growth_rate < 0 %}
+                                <i class="fas fa-arrow-down"></i> {{ "%.1f"|format(user_growth_rate|abs) }}% decline
+                                {% else %}
+                                No change
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Active Users (30d)</h6>
+                            <h2 class="mb-0">{{ active_users_30d }}</h2>
+                            <small>New today: {{ new_users_today }}</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-user-check fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Books</h6>
+                            <h2 class="mb-0">{{ total_books }}</h2>
+                            <small>
+                                {% if book_growth_rate > 0 %}
+                                <i class="fas fa-arrow-up"></i> {{ "%.1f"|format(book_growth_rate) }}% growth
+                                {% else %}
+                                Stable
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div>
+                            <i class="fas fa-book fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Reviews</h6>
+                            <h2 class="mb-0">{{ total_reviews }}</h2>
+                            <small>Today: {{ reviews_today }}</small>
+                        </div>
+                        <div>
+                            <i class="fas fa-star fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competition-Specific Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3 class="mb-3"><i class="fas fa-trophy"></i> Competition Metrics</h3>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-gradient shadow" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Competitions</h6>
+                            <h2 class="mb-0">{{ total_competitions }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-trophy fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient shadow" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Submissions</h6>
+                            <h2 class="mb-0">{{ total_submissions }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-file-alt fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient shadow" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">AI Evaluations</h6>
+                            <h2 class="mb-0">{{ total_evaluations }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-robot fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-gradient shadow" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-uppercase mb-1">Total Winners</h6>
+                            <h2 class="mb-0">{{ total_winners }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-crown fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Engagement Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Avg Reviews per Book</h6>
+                    <h3 class="mb-0 text-primary">{{ "%.2f"|format(avg_reviews_per_book) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Platform Avg Rating</h6>
+                    <h3 class="mb-0 text-warning">{{ "%.2f"|format(avg_rating) }} <i class="fas fa-star"></i></h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">Competition Participation Rate</h6>
+                    <h3 class="mb-0 text-success">{{ "%.1f"|format(competition_participation_rate) }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Growth Trends (Last 30 Days) -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h3 class="mb-3"><i class="fas fa-chart-area"></i> Platform Growth Trends (Last 30 Days)</h3>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-user-plus"></i> User Registrations</h5>
+                </div>
+                <div class="card-body">
+                    {% if user_registration_trend %}
+                    <canvas id="userRegistrationChart" height="200"></canvas>
+                    {% else %}
+                    <p class="text-muted">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-book-medical"></i> Books Added</h5>
+                </div>
+                <div class="card-body">
+                    {% if book_addition_trend %}
+                    <canvas id="bookAdditionChart" height="200"></canvas>
+                    {% else %}
+                    <p class="text-muted">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-comment-dots"></i> Review Activity</h5>
+                </div>
+                <div class="card-body">
+                    {% if review_activity_trend %}
+                    <canvas id="reviewActivityChart" height="200"></canvas>
+                    {% else %}
+                    <p class="text-muted">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active & Upcoming Competitions -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-play"></i> Active Competitions ({{ active_competitions|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_competitions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Submissions</th>
+                                    <th>Evaluated</th>
+                                    <th>Deadline</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in active_competitions %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('competitions_admin.view_competition', competition_id=comp._id) }}">
+                                            {{ comp.title[:40] }}...
+                                        </a>
+                                    </td>
+                                    <td><span class="badge bg-primary">{{ comp.submission_count }}</span></td>
+                                    <td><span class="badge bg-info">{{ comp.evaluation_count }}</span></td>
+                                    <td>{{ comp.submission_end_date.strftime('%b %d') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No active competitions</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Upcoming Competitions ({{ upcoming_competitions|length }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_competitions %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Opens</th>
+                                    <th>Duration</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for comp in upcoming_competitions %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('competitions_admin.view_competition', competition_id=comp._id) }}">
+                                            {{ comp.title[:40] }}...
+                                        </a>
+                                    </td>
+                                    <td>{{ comp.submission_start_date.strftime('%b %d') }}</td>
+                                    <td>{{ ((comp.submission_end_date - comp.submission_start_date).days) }} days</td>
+                                    <td><span class="badge bg-secondary">{{ comp.status }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No upcoming competitions</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Competition Status Breakdown -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Competition Status</h5>
+                </div>
+                <div class="card-body">
+                    {% if status_breakdown %}
+                    <canvas id="statusChart" height="250"></canvas>
+                    {% else %}
+                    <p class="text-muted">No data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Genre Distribution -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Genre Distribution</h5>
+                </div>
+                <div class="card-body">
+                    {% if genre_stats %}
+                    <canvas id="genreChart" height="250"></canvas>
+                    {% else %}
+                    <p class="text-muted">No submissions yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submission Timeline -->
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Recent Submissions</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_submissions %}
+                    <canvas id="timelineChart" height="250"></canvas>
+                    {% else %}
+                    <p class="text-muted">No recent submissions</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions by Competition -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> Top 10 Competitions by Submissions</h5>
+                </div>
+                <div class="card-body">
+                    {% if submissions_by_comp %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Competition</th>
+                                    <th>Submissions</th>
+                                    <th>Avg Word Count</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in submissions_by_comp %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ item.competition.title }}</td>
+                                    <td><span class="badge bg-primary">{{ item.count }}</span></td>
+                                    <td>{{ "%.0f"|format(item.avg_word_count or 0) }} words</td>
+                                    <td><span class="badge bg-secondary">{{ item.competition.status }}</span></td>
+                                    <td>
+                                        <a href="{{ url_for('competitions_admin.view_competition', competition_id=item._id) }}" 
+                                           class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No submission data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Evaluation Scores -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> Average AI Evaluation Scores by Competition</h5>
+                </div>
+                <div class="card-body">
+                    {% if score_stats %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Competition</th>
+                                    <th>Evaluations</th>
+                                    <th>Overall Score</th>
+                                    <th>Plot/Structure</th>
+                                    <th>Character Dev</th>
+                                    <th>Writing Quality</th>
+                                    <th>Originality</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in score_stats %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('competitions_admin.view_competition', competition_id=item._id) }}">
+                                            {{ item.competition.title[:50] }}
+                                        </a>
+                                    </td>
+                                    <td>{{ item.evaluations_count }}</td>
+                                    <td>
+                                        <strong class="text-primary">{{ "%.1f"|format(item.avg_overall_score or 0) }}</strong>
+                                        <div class="progress" style="height: 5px;">
+                                            <div class="progress-bar bg-primary" style="width: {{ item.avg_overall_score or 0 }}%"></div>
+                                        </div>
+                                    </td>
+                                    <td>{{ "%.1f"|format(item.avg_plot or 0) }}</td>
+                                    <td>{{ "%.1f"|format(item.avg_character or 0) }}</td>
+                                    <td>{{ "%.1f"|format(item.avg_writing or 0) }}</td>
+                                    <td>{{ "%.1f"|format(item.avg_originality or 0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No evaluation data available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Authors -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-users"></i> Top 10 Authors by Competition Wins</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_authors %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Author</th>
+                                    <th>Total Wins</th>
+                                    <th>Competitions Entered</th>
+                                    <th>Finalist Placements</th>
+                                    <th>Best Rank</th>
+                                    <th>Win Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for author in top_authors %}
+                                <tr>
+                                    <td><strong>{{ loop.index }}</strong></td>
+                                    <td>
+                                        <a href="{{ url_for('users.get_user', user_id=author._id) }}">
+                                            {{ author.full_name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">
+                                            🏆 {{ author.competition_stats.total_wins }}
+                                        </span>
+                                    </td>
+                                    <td>{{ author.competition_stats.total_entered }}</td>
+                                    <td>{{ author.competition_stats.total_finalist }}</td>
+                                    <td>
+                                        {% if author.competition_stats.best_rank == 1 %}
+                                        🥇 1st
+                                        {% elif author.competition_stats.best_rank == 2 %}
+                                        🥈 2nd
+                                        {% elif author.competition_stats.best_rank == 3 %}
+                                        🥉 3rd
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if author.competition_stats.total_entered > 0 %}
+                                        {{ "%.0f"|format((author.competition_stats.total_wins / author.competition_stats.total_entered) * 100) }}%
+                                        {% else %}
+                                        0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No winners yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Status Breakdown Chart
+{% if status_breakdown %}
+const statusCtx = document.getElementById('statusChart');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [{% for item in status_breakdown %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for item in status_breakdown %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#dc3545', '#6c757d']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+{% endif %}
+
+// Genre Distribution Chart
+{% if genre_stats %}
+const genreCtx = document.getElementById('genreChart');
+new Chart(genreCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for item in genre_stats %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Submissions',
+            data: [{% for item in genre_stats %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            backgroundColor: '#0d6efd'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+
+// Timeline Chart
+{% if recent_submissions %}
+const timelineCtx = document.getElementById('timelineChart');
+new Chart(timelineCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in recent_submissions %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Submissions',
+            data: [{% for item in recent_submissions %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#198754',
+            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+
+// User Registration Trend Chart
+{% if user_registration_trend %}
+const userRegCtx = document.getElementById('userRegistrationChart');
+new Chart(userRegCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in user_registration_trend %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'New Users',
+            data: [{% for item in user_registration_trend %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+
+// Book Addition Trend Chart
+{% if book_addition_trend %}
+const bookAddCtx = document.getElementById('bookAdditionChart');
+new Chart(bookAddCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in book_addition_trend %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Books Added',
+            data: [{% for item in book_addition_trend %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#0dcaf0',
+            backgroundColor: 'rgba(13, 202, 240, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+
+// Review Activity Trend Chart
+{% if review_activity_trend %}
+const reviewActCtx = document.getElementById('reviewActivityChart');
+new Chart(reviewActCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in review_activity_trend %}'{{ item._id }}'{% if not loop.last %}, {% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Reviews Posted',
+            data: [{% for item in review_activity_trend %}{{ item.count }}{% if not loop.last %}, {% endif %}{% endfor %}],
+            borderColor: '#ffc107',
+            backgroundColor: 'rgba(255, 193, 7, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+{% endif %}
+</script>
+
+<!-- Export and Additional Functionality -->
+<script>
+// CSV Export Function
+function exportToCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    // Header
+    csvContent += "InkLaunch Competition Analytics Dashboard\\n";
+    csvContent += "Generated: " + new Date().toLocaleString() + "\\n\\n";
+    
+    // Key Metrics
+    csvContent += "KEY METRICS\\n";
+    csvContent += "Total Competitions,{{ total_competitions }}\\n";
+    csvContent += "Total Submissions,{{ total_submissions }}\\n";
+    csvContent += "AI Evaluations,{{ total_evaluations }}\\n";
+    csvContent += "Total Winners,{{ total_winners }}\\n\\n";
+    
+    // Top Competitions
+    csvContent += "TOP COMPETITIONS BY SUBMISSIONS\\n";
+    csvContent += "Rank,Title,Submissions,Avg Word Count,Status\\n";
+    {% for item in submissions_by_comp %}
+    csvContent += "{{ loop.index }},{{ item.competition.title|replace(',', ';') }},{{ item.count }},{{ '%.0f'|format(item.avg_word_count or 0) }},{{ item.competition.status }}\\n";
+    {% endfor %}
+    csvContent += "\\n";
+    
+    // Top Authors
+    csvContent += "TOP AUTHORS BY WINS\\n";
+    csvContent += "Rank,Author,Wins,Competitions Entered,Win Rate\\n";
+    {% for author in top_authors %}
+    csvContent += "{{ loop.index }},{{ author.full_name|replace(',', ';') }},{{ author.competition_stats.total_wins }},{{ author.competition_stats.total_entered }},";
+    {% if author.competition_stats.total_entered > 0 %}
+    csvContent += "{{ '%.0f'|format((author.competition_stats.total_wins / author.competition_stats.total_entered) * 100) }}%\\n";
+    {% else %}
+    csvContent += "0%\\n";
+    {% endif %}
+    {% endfor %}
+    
+    // Download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "inklaunch_analytics_" + new Date().toISOString().split('T')[0] + ".csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+// Auto-refresh every 5 minutes (optional)
+let autoRefresh = false;
+function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    if (autoRefresh) {
+        setInterval(() => location.reload(), 300000); // 5 minutes
+        alert('Auto-refresh enabled (every 5 minutes)');
+    }
+}
+
+// Real-time timestamp update
+function updateTimestamp() {
+    const now = new Date();
+    const timestamp = document.getElementById('last-updated');
+    if (timestamp) {
+        timestamp.textContent = 'Last updated: ' + now.toLocaleTimeString();
+    }
+}
+
+// Update timestamp every second
+setInterval(updateTimestamp, 1000);
+
+// Print-friendly styles
+window.onbeforeprint = function() {
+    document.querySelectorAll('.btn').forEach(el => el.style.display = 'none');
+};
+window.onafterprint = function() {
+    document.querySelectorAll('.btn').forEach(el => el.style.display = '');
+};
+</script>
+
+<!-- Live Status Indicator -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div class="toast show" role="alert">
+        <div class="toast-header bg-success text-white">
+            <i class="fas fa-circle fa-blink me-2"></i>
+            <strong class="me-auto">Live Dashboard</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body">
+            <small id="last-updated">Last updated: Loading...</small>
+        </div>
+    </div>
+</div>
+
+<style>
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.fa-blink {
+    animation: blink 2s infinite;
+}
+
+@media print {
+    .btn, .toast, nav { display: none !important; }
+    .container-fluid { width: 100%; max-width: none; }
+    .card { break-inside: avoid; page-break-inside: avoid; }
+}
+</style>
+
+{% endblock %}

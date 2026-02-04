@@ -5,60 +5,111 @@
 {% block content %}
 <div class="container mt-5">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-4 mb-4">
+            <!-- Profile Photo Card -->
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3>My Profile</h3>
-                </div>
-                <div class="card-body">
-                    <h4>{{ user.full_name }}</h4>
-                    <p class="text-muted">{{ user.email }}</p>
-                    
-                    {% if user.bio %}
-                    <p>{{ user.bio }}</p>
+                <div class="card-body text-center">
+                    {% if user.profile_image_url %}
+                    <img src="{{ user.profile_image_url }}" alt="{{ user.full_name }}" 
+                         class="rounded-circle img-fluid mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 200px; height: 200px;">
+                        <i class="bi bi-person-fill text-white" style="font-size: 100px;"></i>
+                    </div>
                     {% endif %}
                     
-                    <hr>
+                    <h4 class="mb-1">{{ user.full_name }}</h4>
+                    <p class="text-muted mb-3">{{ user.email }}</p>
                     
-                    <div class="row text-center">
-                        <div class="col-md-4">
-                            <h5>{{ user.total_nominations or 0 }}</h5>
-                            <small class="text-muted">Nominations</small>
-                        </div>
-                        <div class="col-md-4">
-                            <h5>{{ user.total_wins or 0 }}</h5>
-                            <small class="text-muted">Competition Wins</small>
-                        </div>
-                        <div class="col-md-4">
-                            <h5>{{ user.author_of_month_count or 0 }}</h5>
-                            <small class="text-muted">Author of Month</small>
-                        </div>
+                    {% if user.role == 'admin' %}
+                    <span class="badge bg-danger mb-3">Administrator</span>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('users.edit_profile') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-pencil"></i> Edit Profile
+                        </a>
+                        {% if user.profile_image_url %}
+                        <form method="POST" action="{{ url_for('users.delete_profile_photo') }}" 
+                              onsubmit="return confirm('Are you sure you want to delete your profile photo?');">
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                <i class="bi bi-trash"></i> Delete Photo
+                            </button>
+                        </form>
+                        {% endif %}
                     </div>
-                    
-                    <hr>
-                    
-                    <a href="{{ url_for('users.edit_profile') }}" class="btn btn-primary me-2">
-                        <i class="bi bi-pencil"></i> Edit Profile
-                    </a>
-                    <a href="{{ url_for('users.change_password') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-key"></i> Change Password
-                    </a>
+                </div>
+            </div>
+            
+            <!-- Quick Stats Card -->
+            <div class="card mt-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Nominations:</span>
+                        <strong>{{ user.total_nominations or 0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Competition Wins:</span>
+                        <strong class="text-success">{{ user.total_wins or 0 }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Author of Month:</span>
+                        <strong class="text-warning">{{ user.author_of_month_count or 0 }}</strong>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5>Account Info</h5>
+        <div class="col-md-8">
+            <!-- Bio Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-person"></i> About Me</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Role:</strong> {{ user.role|title }}</p>
-                    <p><strong>Member Since:</strong> {{ user.created_at.strftime('%B %Y') }}</p>
-                    <p><strong>Status:</strong> 
-                        <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
-                            {{ 'Active' if user.is_active else 'Inactive' }}
-                        </span>
+                    {% if user.bio %}
+                    <p>{{ user.bio }}</p>
+                    {% else %}
+                    <p class="text-muted"><em>No bio added yet. Click "Edit Profile" to add one!</em></p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Account Settings Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear"></i> Account Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('users.edit_profile') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-pencil-square text-primary"></i>
+                            <strong>Edit Profile</strong>
+                            <p class="mb-0 text-muted small">Update your name, bio, and profile photo</p>
+                        </a>
+                        <a href="{{ url_for('users.change_password') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-key text-warning"></i>
+                            <strong>Change Password</strong>
+                            <p class="mb-0 text-muted small">Update your account password</p>
+                        </a>
+                        <a href="{{ url_for('users.get_user', user_id=user._id) }}" class="list-group-item list-group-item-action" target="_blank">
+                            <i class="bi bi-eye text-info"></i>
+                            <strong>View Public Profile</strong>
+                            <p class="mb-0 text-muted small">See how others view your profile</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Member Since Card -->
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-calendar-check"></i> Member since {{ user.created_at.strftime('%B %d, %Y') }}
                     </p>
                 </div>
             </div>

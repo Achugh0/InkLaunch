@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from config import config
 import os
+import markdown
 
 # Initialize extensions
 mongo = PyMongo()
@@ -28,11 +29,25 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
     
+    # Set absolute path for upload folder
+    if not os.path.isabs(app.config['UPLOAD_FOLDER']):
+        app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, '..', app.config['UPLOAD_FOLDER'])
+        app.config['UPLOAD_FOLDER'] = os.path.abspath(app.config['UPLOAD_FOLDER'])
+    
     # Create upload folder
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
+    # Register custom template filters
+    @app.template_filter('markdown')
+    def markdown_filter(text):
+        """Convert markdown to HTML."""
+        if not text:
+            return ''
+        return markdown.markdown(text, extensions=['nl2br', 'fenced_code', 'tables'])
+    
     # Register blueprints
     from app.routes import auth, books, reviews, users, admin, articles, tools, competitions, services
+    from app.routes import competitions_admin, manuscript_competitions, marketing, writing
     
     app.register_blueprint(auth.bp)
     app.register_blueprint(books.bp)
@@ -43,6 +58,10 @@ def create_app(config_name=None):
     app.register_blueprint(tools.bp)
     app.register_blueprint(competitions.bp)
     app.register_blueprint(services.bp)
+    app.register_blueprint(competitions_admin.bp)
+    app.register_blueprint(manuscript_competitions.bp)
+    app.register_blueprint(marketing.marketing_bp)
+    app.register_blueprint(writing.writing_bp)
     
     # Register main routes
     from app.routes import main

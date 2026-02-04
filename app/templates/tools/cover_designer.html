@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Cover Size Calculator - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <h1 class="mb-4">
+                <i class="bi bi-rulers"></i> Amazon KDP Cover Size Calculator
+            </h1>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Calculate exact cover dimensions for Amazon Kindle Direct Publishing. Get precise measurements for ebooks and paperbacks.
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="POST" id="coverForm">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Book Type</label>
+                            <select class="form-select" name="book_type" id="bookType" required>
+                                <option value="ebook">Ebook (Kindle)</option>
+                                <option value="paperback">Paperback (Print-on-Demand)</option>
+                            </select>
+                        </div>
+
+                        <div id="paperbackOptions" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Trim Size</label>
+                                <select class="form-select" name="trim_size" id="trimSize">
+                                    <option value="6x9">6" x 9" (Most Popular)</option>
+                                    <option value="5x8">5" x 8"</option>
+                                    <option value="5.5x8.5">5.5" x 8.5"</option>
+                                    <option value="7x10">7" x 10"</option>
+                                    <option value="8x10">8" x 10"</option>
+                                    <option value="8.5x11">8.5" x 11"</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Page Count</label>
+                                <input type="number" class="form-control" name="page_count" id="pageCount" 
+                                       value="100" min="24" max="828" step="1">
+                                <small class="text-muted">KDP allows 24-828 pages for most trim sizes</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Paper Type</label>
+                                <select class="form-select" name="paper_type" id="paperType">
+                                    <option value="white">White Paper</option>
+                                    <option value="cream">Cream Paper</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Interior Type</label>
+                                <select class="form-select" name="interior_type" id="interiorType">
+                                    <option value="black">Black & White</option>
+                                    <option value="color">Color</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-calculator"></i> Calculate Cover Size
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if results %}
+            <div class="card shadow-lg border-success" id="results">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-check-circle"></i> Cover Specifications</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-success mb-3">{{ results.book_type }}</h5>
+                    
+                    {% if results.book_type == 'Ebook (Kindle)' %}
+                    <table class="table table-striped">
+                        <tr>
+                            <th width="40%">Recommended Size:</th>
+                            <td><strong class="text-primary">{{ results.recommended_size }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Minimum Size:</th>
+                            <td>{{ results.minimum_size }}</td>
+                        </tr>
+                        <tr>
+                            <th>Aspect Ratio:</th>
+                            <td>{{ results.aspect_ratio }}</td>
+                        </tr>
+                        <tr>
+                            <th>Resolution:</th>
+                            <td>{{ results.resolution }}</td>
+                        </tr>
+                        <tr>
+                            <th>Max File Size:</th>
+                            <td>{{ results.max_file_size }}</td>
+                        </tr>
+                        <tr>
+                            <th>Format:</th>
+                            <td>{{ results.format }}</td>
+                        </tr>
+                        <tr>
+                            <th>Color Mode:</th>
+                            <td>{{ results.color_mode }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-warning mt-3">
+                        <h6><i class="bi bi-lightbulb"></i> Design Tips:</h6>
+                        <ul class="mb-0">
+                            {% for note in results.notes %}
+                            <li>{{ note }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    {% else %}
+                    <!-- Paperback Results -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>Trim Size:</th>
+                                    <td>{{ results.trim_size }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Page Count:</th>
+                                    <td>{{ results.page_count }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Paper Type:</th>
+                                    <td>{{ results.paper_type }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Interior:</th>
+                                    <td>{{ results.interior_type }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Total Cover Dimensions</h6>
+                                    <h3 class="mb-0">{{ results.total_dimensions }}</h3>
+                                    <p class="mb-0">{{ results.dimensions_pixels }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6><i class="bi bi-layout-three-columns"></i> Cover Layout:</h6>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <strong>Back Cover</strong><br>
+                                    <span class="badge bg-secondary">{{ results.cover_layout.back_cover_width }}</span>
+                                </div>
+                                <div class="col-4">
+                                    <strong>Spine</strong><br>
+                                    <span class="badge bg-info">{{ results.cover_layout.spine_width }}</span>
+                                </div>
+                                <div class="col-4">
+                                    <strong>Front Cover</strong><br>
+                                    <span class="badge bg-secondary">{{ results.cover_layout.front_cover_width }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-striped">
+                        <tr>
+                            <th width="40%">Spine Width:</th>
+                            <td><strong class="text-danger">{{ results.spine_width }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Resolution:</th>
+                            <td>{{ results.resolution }}</td>
+                        </tr>
+                        <tr>
+                            <th>File Format:</th>
+                            <td>{{ results.format }}</td>
+                        </tr>
+                        <tr>
+                            <th>Color Mode:</th>
+                            <td>{{ results.color_mode }}</td>
+                        </tr>
+                        <tr>
+                            <th>Bleed:</th>
+                            <td>{{ results.bleed }}</td>
+                        </tr>
+                        <tr>
+                            <th>Safe Zone:</th>
+                            <td>{{ results.safe_zone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Spine Safe Zone:</th>
+                            <td>{{ results.spine_safe_zone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Barcode Space:</th>
+                            <td>{{ results.barcode_space }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-warning mt-3">
+                        <h6><i class="bi bi-exclamation-triangle"></i> Important Notes:</h6>
+                        <ul class="mb-0">
+                            {% for note in results.notes %}
+                            <li>{{ note }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-diagram-3"></i> Cover Design Guide:</h6>
+                        <p class="mb-2"><strong>Back Cover:</strong> Place your book description, author bio, barcode space</p>
+                        <p class="mb-2"><strong>Spine:</strong> Book title, author name (for spines wider than 0.25")</p>
+                        <p class="mb-0"><strong>Front Cover:</strong> Title, subtitle, author name, compelling imagery</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-4 text-center">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print Specifications
+                        </button>
+                        <a href="{{ url_for('tools.cover_designer') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise"></i> Calculate Another
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-question-circle"></i> Need Help?</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Additional Resources:</h6>
+                    <ul>
+                        <li><a href="https://kdp.amazon.com/en_US/help/topic/G201834180" target="_blank">Amazon KDP Cover Calculator</a></li>
+                        <li><a href="{{ url_for('articles.list_articles') }}">Browse our Publishing Articles</a></li>
+                        <li>Search for "Amazon KDP Cover Requirements" in our articles</li>
+                    </ul>
+                    
+                    <h6 class="mt-3">Common Trim Sizes:</h6>
+                    <ul class="list-unstyled">
+                        <li><strong>6" x 9"</strong> - Most popular for novels and non-fiction</li>
+                        <li><strong>5" x 8"</strong> - Compact novels, romance, mystery</li>
+                        <li><strong>5.5" x 8.5"</strong> - Between standard sizes</li>
+                        <li><strong>7" x 10"</strong> - Textbooks, workbooks, journals</li>
+                        <li><strong>8.5" x 11"</strong> - Manuals, cookbooks, photography</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('bookType').addEventListener('change', function() {
+    const paperbackOptions = document.getElementById('paperbackOptions');
+    if (this.value === 'paperback') {
+        paperbackOptions.style.display = 'block';
+    } else {
+        paperbackOptions.style.display = 'none';
+    }
+});
+
+// Show paperback options if results exist and book type is paperback
+{% if results and results.book_type == 'Paperback' %}
+document.getElementById('bookType').value = 'paperback';
+document.getElementById('paperbackOptions').style.display = 'block';
+{% endif %}
+</script>
+{% endblock %}

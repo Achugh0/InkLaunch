@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Book Widget - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="mb-4"><i class="bi bi-code-square"></i> Embeddable Book Widget</h1>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Widget Preview</h5>
+                    <div class="p-3 bg-light">
+                        {{ widget_code|safe }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">HTML Code</h5>
+                    <p class="text-muted">Copy this code and paste it into your website or blog:</p>
+                    <textarea class="form-control font-monospace" rows="15" readonly>{{ widget_code }}</textarea>
+                    <button class="btn btn-primary mt-3" onclick="copyCode()">
+                        <i class="bi bi-clipboard"></i> Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyCode() {
+    const textarea = document.querySelector('textarea');
+    textarea.select();
+    document.execCommand('copy');
+    alert('Widget code copied to clipboard!');
+}
+</script>
+{% endblock %}

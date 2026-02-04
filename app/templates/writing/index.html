@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Writing Tools - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="bi bi-pen"></i> Writing & Creative Tools
+            </h1>
+            <p class="lead">Enhance your writing with our free creative tools</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-3">
+        <!-- Title Tester -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-check-circle text-primary"></i> Title Tester
+                    </h5>
+                    <p class="card-text">Poll readers on which book title sounds most appealing and check for duplicates.</p>
+                    <a href="{{ url_for('writing.title_tester') }}" class="btn btn-primary">
+                        <i class="bi bi-vote-fill"></i> Test Titles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cover Feedback -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-image text-success"></i> Cover Feedback
+                    </h5>
+                    <p class="card-text">Upload cover mockups and get community feedback before finalizing.</p>
+                    <a href="{{ url_for('writing.cover_feedback') }}" class="btn btn-success">
+                        <i class="bi bi-chat-dots"></i> Get Feedback
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word Count Tracker -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-bar-chart text-info"></i> Word Count Tracker
+                    </h5>
+                    <p class="card-text">Track your daily writing progress with public or private word counts.</p>
+                    <a href="{{ url_for('writing.word_count_tracker') }}" class="btn btn-info">
+                        <i class="bi bi-graph-up"></i> Track Progress
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Writing Prompts -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightbulb text-warning"></i> Writing Prompts
+                    </h5>
+                    <p class="card-text">Daily writing prompts for inspiration across all genres.</p>
+                    <a href="{{ url_for('writing.writing_prompts') }}" class="btn btn-warning">
+                        <i class="bi bi-magic"></i> Get Prompt
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Name Generator -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-badge text-danger"></i> Name Generator
+                    </h5>
+                    <p class="card-text">Generate culturally appropriate character names for your story.</p>
+                    <a href="{{ url_for('writing.character_name_generator') }}" class="btn btn-danger">
+                        <i class="bi bi-shuffle"></i> Generate Names
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blurb Generator -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-file-text text-primary"></i> Blurb Generator
+                    </h5>
+                    <p class="card-text">AI-assisted tool to create compelling book descriptions (3 free/month).</p>
+                    <a href="{{ url_for('writing.blurb_generator') }}" class="btn btn-primary">
+                        <i class="bi bi-stars"></i> Generate Blurb
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manuscript Formatter -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-file-code text-success"></i> Manuscript Formatter
+                    </h5>
+                    <p class="card-text">Format manuscripts with proper chapter headings and scene breaks.</p>
+                    <a href="{{ url_for('writing.manuscript_formatter') }}" class="btn btn-success">
+                        <i class="bi bi-file-earmark"></i> Format Text
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Genre Checker -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-bookmark-check text-info"></i> Genre Checker
+                    </h5>
+                    <p class="card-text">AI tool that flags genre expectation mismatches in your manuscript.</p>
+                    <a href="{{ url_for('writing.genre_checker') }}" class="btn btn-info">
+                        <i class="bi bi-search"></i> Check Genre
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

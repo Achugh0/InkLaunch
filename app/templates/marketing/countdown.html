@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Book Launch Countdown - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="mb-4">{{ book.title }}</h1>
+            <p class="lead">by {{ author.full_name }}</p>
+            
+            {% if book.cover_image_url %}
+            <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" 
+                 class="img-fluid rounded shadow mb-4" style="max-width: 300px;">
+            {% endif %}
+
+            <h2 class="mb-4">Coming Soon!</h2>
+            
+            <div id="countdown" class="mb-5">
+                <div class="row g-3">
+                    <div class="col-3">
+                        <div class="p-4 bg-primary text-white rounded">
+                            <h2 id="days">0</h2>
+                            <p class="mb-0">Days</p>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-4 bg-primary text-white rounded">
+                            <h2 id="hours">0</h2>
+                            <p class="mb-0">Hours</p>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-4 bg-primary text-white rounded">
+                            <h2 id="minutes">0</h2>
+                            <p class="mb-0">Minutes</p>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="p-4 bg-primary text-white rounded">
+                            <h2 id="seconds">0</h2>
+                            <p class="mb-0">Seconds</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{{ url_for('books.book_detail', book_id=book._id) }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-book"></i> Learn More
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set launch date (example: 30 days from now)
+const launchDate = new Date();
+launchDate.setDate(launchDate.getDate() + 30);
+
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = launchDate - now;
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').textContent = days;
+    document.getElementById('hours').textContent = hours;
+    document.getElementById('minutes').textContent = minutes;
+    document.getElementById('seconds').textContent = seconds;
+
+    if (distance < 0) {
+        document.getElementById('countdown').innerHTML = '<h2 class="text-success">NOW AVAILABLE!</h2>';
+    }
+}
+
+updateCountdown();
+setInterval(updateCountdown, 1000);
+</script>
+{% endblock %}

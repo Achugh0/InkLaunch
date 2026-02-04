@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Manuscript Formatter - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-file-code"></i> Manuscript Formatter</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Input Manuscript</h5>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <textarea class="form-control font-monospace" name="manuscript_text" 
+                                      rows="20" placeholder="Paste your manuscript here..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <select class="form-select" name="format_type">
+                                <option value="standard">Standard Format</option>
+                                <option value="ebook">E-book Format</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-magic"></i> Format
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Formatted Output</h5>
+                    {% if formatted_text %}
+                    <div style="max-height: 500px; overflow-y: auto; border: 1px solid #ddd; padding: 20px; background: white;">
+                        {{ formatted_text|safe }}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Formatted text will appear here...</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6>Formatting Tips:</h6>
+                <ul>
+                    <li>Start chapter headings with "CHAPTER"</li>
+                    <li>Use "***" or "###" for scene breaks</li>
+                    <li>Paragraphs will be automatically indented</li>
+                    <li>Blank lines separate paragraphs</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

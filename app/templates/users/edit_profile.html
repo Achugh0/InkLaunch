@@ -4,33 +4,200 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="mb-4">Edit Profile</h1>
-    
-    <div class="card">
-        <div class="card-body">
-            <form method="POST" action="{{ url_for('users.edit_profile') }}">
-                <div class="mb-3">
-                    <label for="full_name" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ user.full_name }}" required>
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <h1 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Profile</h1>
+            
+            <form method="POST" action="{{ url_for('users.edit_profile') }}" enctype="multipart/form-data">
+                <!-- Banner Image Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-image"></i> Cover Images</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><strong>Banner Image</strong></label>
+                                {% if user.banner_image_url %}
+                                <img src="{{ user.banner_image_url }}" alt="Banner" class="img-fluid mb-2 rounded" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                {% else %}
+                                <div class="bg-secondary text-white text-center p-5 mb-2 rounded">
+                                    <i class="bi bi-image" style="font-size: 48px;"></i>
+                                    <p>No banner image</p>
+                                </div>
+                                {% endif %}
+                                <input type="file" class="form-control" name="banner_image" accept="image/*">
+                                <small class="text-muted">Recommended: 1200x300px</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><strong>Profile Photo</strong></label>
+                                <div class="text-center">
+                                    {% if user.profile_image_url %}
+                                    <img src="{{ user.profile_image_url }}" alt="{{ user.full_name }}" 
+                                         class="rounded-circle img-fluid mb-2" style="width: 150px; height: 150px; object-fit: cover;" id="profilePreview">
+                                    {% else %}
+                                    <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-2" 
+                                         style="width: 150px; height: 150px;" id="profilePlaceholder">
+                                        <i class="bi bi-person-fill text-white" style="font-size: 80px;"></i>
+                                    </div>
+                                    <img src="" alt="Preview" class="rounded-circle img-fluid mb-2 d-none" 
+                                         style="width: 150px; height: 150px; object-fit: cover;" id="profilePreview">
+                                    {% endif %}
+                                </div>
+                                <input type="file" class="form-control" id="profile_image" name="profile_image" 
+                                       accept="image/*" onchange="previewImage(event)">
+                                <small class="text-muted">Recommended: 400x400px</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label for="bio" class="form-label">Bio</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="4">{{ user.bio or '' }}</textarea>
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-person-badge"></i> Basic Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="full_name" class="form-label"><strong>Full Name *</strong></label>
+                            <input type="text" class="form-control" id="full_name" name="full_name" 
+                                   value="{{ user.full_name }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="bio" class="form-label"><strong>Bio (Max 500 words)</strong></label>
+                            <textarea class="form-control" id="bio" name="bio" rows="8" 
+                                      placeholder="Tell readers about yourself, your writing journey, influences, and what drives your creativity...">{{ user.bio or '' }}</textarea>
+                            <small class="text-muted">
+                                <span id="wordCount">0</span> / 500 words
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="website_url" class="form-label"><strong>Website URL</strong></label>
+                            <input type="url" class="form-control" id="website_url" name="website_url" 
+                                   value="{{ user.website_url or '' }}" placeholder="https://yourwebsite.com">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Email</strong></label>
+                            <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                            <small class="form-text text-muted">Email cannot be changed</small>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" value="{{ user.email }}" disabled>
-                    <small class="form-text text-muted">Email cannot be changed</small>
+                <!-- Social Media Links -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-share"></i> Social Media Links</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-twitter text-info"></i> Twitter</label>
+                                <input type="url" class="form-control" name="social_twitter" 
+                                       value="{{ user.social_links.twitter if user.social_links else '' }}" 
+                                       placeholder="https://twitter.com/yourusername">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-facebook text-primary"></i> Facebook</label>
+                                <input type="url" class="form-control" name="social_facebook" 
+                                       value="{{ user.social_links.facebook if user.social_links else '' }}" 
+                                       placeholder="https://facebook.com/yourpage">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-instagram text-danger"></i> Instagram</label>
+                                <input type="url" class="form-control" name="social_instagram" 
+                                       value="{{ user.social_links.instagram if user.social_links else '' }}" 
+                                       placeholder="https://instagram.com/yourusername">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-linkedin text-primary"></i> LinkedIn</label>
+                                <input type="url" class="form-control" name="social_linkedin" 
+                                       value="{{ user.social_links.linkedin if user.social_links else '' }}" 
+                                       placeholder="https://linkedin.com/in/yourprofile">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-book text-warning"></i> Goodreads</label>
+                                <input type="url" class="form-control" name="social_goodreads" 
+                                       value="{{ user.social_links.goodreads if user.social_links else '' }}" 
+                                       placeholder="https://goodreads.com/author/show/your-id">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label"><i class="bi bi-shop text-success"></i> Amazon Author Page</label>
+                                <input type="url" class="form-control" name="social_amazon_author" 
+                                       value="{{ user.social_links.amazon_author if user.social_links else '' }}" 
+                                       placeholder="https://amazon.com/author/yourname">
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="d-flex justify-content-between">
-                    <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                <!-- Action Buttons -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('profilePreview');
+            const placeholder = document.getElementById('profilePlaceholder');
+            
+            preview.src = e.target.result;
+            preview.classList.remove('d-none');
+            if (placeholder) {
+                placeholder.classList.add('d-none');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Word counter for bio
+document.getElementById('bio').addEventListener('input', function() {
+    const text = this.value.trim();
+    const words = text.split(/\s+/).filter(word => word.length > 0);
+    const count = words.length;
+    document.getElementById('wordCount').textContent = count;
+    
+    if (count > 500) {
+        document.getElementById('wordCount').classList.add('text-danger');
+    } else {
+        document.getElementById('wordCount').classList.remove('text-danger');
+    }
+});
+
+// Initialize word count on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const bio = document.getElementById('bio');
+    if (bio.value) {
+        const words = bio.value.trim().split(/\s+/).filter(word => word.length > 0);
+        document.getElementById('wordCount').textContent = words.length;
+    }
+});
+</script>
 {% endblock %}

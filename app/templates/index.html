@@ -162,59 +162,6 @@
     </div>
 </div>
 
-<!-- Professional Services Section -->
-<div class="py-5 my-5" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-    <div class="container">
-        <div class="text-center text-white mb-5">
-            <h2 class="display-4 fw-bold mb-3">💼 Professional Services</h2>
-            <p class="lead">Take your book to the next level with expert help</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-lg h-100">
-                    <div class="card-body text-center p-4">
-                        <div style="font-size: 3.5rem;" class="mb-3">🎨</div>
-                        <h4 class="fw-bold mb-3">Cover Design</h4>
-                        <p class="text-muted mb-3">Professional, eye-catching book covers that sell</p>
-                        <p class="h3 text-primary fw-bold mb-3">$75</p>
-                        <a href="{{ url_for('services.service_detail', service_id='cover_design') }}" class="btn btn-outline-primary">Learn More</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-lg h-100">
-                    <div class="card-body text-center p-4">
-                        <div style="font-size: 3.5rem;" class="mb-3">✏️</div>
-                        <h4 class="fw-bold mb-3">Professional Editing</h4>
-                        <p class="text-muted mb-3">Polish your manuscript to perfection</p>
-                        <p class="h3 text-primary fw-bold mb-3">From $75</p>
-                        <small class="text-muted d-block">Based on page count</small>
-                        <a href="{{ url_for('services.service_detail', service_id='editing') }}" class="btn btn-outline-primary">Learn More</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-lg h-100">
-                    <div class="card-body text-center p-4">
-                        <div style="font-size: 3.5rem;" class="mb-3">👻</div>
-                        <h4 class="fw-bold mb-3">Ghost Writing</h4>
-                        <p class="text-muted mb-3">Bring your story ideas to life professionally</p>
-                        <p class="h3 text-primary fw-bold mb-3">$750</p>
-                        <a href="{{ url_for('services.service_detail', service_id='ghostwriting') }}" class="btn btn-outline-primary">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="text-center mt-5">
-            <a href="{{ url_for('services.list_services') }}" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px;">
-                <i class="bi bi-briefcase"></i> View All Services
-            </a>
-        </div>
-    </div>
-</div>
-
 <!-- Trending Books Section -->
 <div class="container my-5 py-4">
     <div class="text-center mb-5">
@@ -574,6 +521,59 @@
             </div>
             <h5 class="fw-bold">Win Awards</h5>
             <p class="text-muted">Compete for monthly recognition</p>
+        </div>
+    </div>
+</div>
+
+<!-- Professional Services Section -->
+<div class="py-5 my-5" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+    <div class="container">
+        <div class="text-center text-white mb-5">
+            <h2 class="display-4 fw-bold mb-3">💼 Professional Services</h2>
+            <p class="lead">Take your book to the next level with expert help</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">🎨</div>
+                        <h4 class="fw-bold mb-3">Cover Design</h4>
+                        <p class="text-muted mb-3">Professional, eye-catching book covers that sell</p>
+                        <p class="h3 text-primary fw-bold mb-3">$75</p>
+                        <a href="{{ url_for('services.service_detail', service_id='cover_design') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">✏️</div>
+                        <h4 class="fw-bold mb-3">Professional Editing</h4>
+                        <p class="text-muted mb-3">Polish your manuscript to perfection</p>
+                        <p class="h3 text-primary fw-bold mb-3">From $75</p>
+                        <small class="text-muted d-block">Based on page count</small>
+                        <a href="{{ url_for('services.service_detail', service_id='editing') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-lg h-100">
+                    <div class="card-body text-center p-4">
+                        <div style="font-size: 3.5rem;" class="mb-3">👻</div>
+                        <h4 class="fw-bold mb-3">Ghost Writing</h4>
+                        <p class="text-muted mb-3">Bring your story ideas to life professionally</p>
+                        <p class="h3 text-primary fw-bold mb-3">$750</p>
+                        <a href="{{ url_for('services.service_detail', service_id='ghostwriting') }}" class="btn btn-outline-primary">Learn More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{{ url_for('services.list_services') }}" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px;">
+                <i class="bi bi-briefcase"></i> View All Services
+            </a>
         </div>
     </div>
 </div>

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Writing Prompts - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-4"><i class="bi bi-lightbulb"></i> Daily Writing Prompt</h1>
+            
+            <!-- Genre Filter -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-8">
+                            <select class="form-select" name="genre" onchange="this.form.submit()">
+                                <option value="">All Genres</option>
+                                {% for g in genres %}
+                                <option value="{{ g }}" {% if selected_genre == g %}selected{% endif %}>{{ g }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-shuffle"></i> Get New Prompt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Prompt Display -->
+            {% if prompt %}
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-primary px-3 py-2">{{ prompt.genre }}</span>
+                        <span class="badge bg-secondary px-3 py-2">{{ prompt.difficulty.capitalize() }}</span>
+                    </div>
+                    <blockquote class="blockquote text-center">
+                        <p class="fs-4">"{{ prompt.prompt_text }}"</p>
+                    </blockquote>
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            <i class="bi bi-people"></i> Used {{ prompt.use_count }} times by the community
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('writing.writing_prompts') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-clockwise"></i> Get Another Prompt
+                </a>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> No prompts available for this genre yet. Try another genre!
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

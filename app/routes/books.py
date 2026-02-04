@@ -21,18 +21,33 @@ def allowed_file(filename):
 
 @bp.route('/', methods=['GET'])
 def list_books():
-    """List all books."""
+    """List and search all books."""
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['ITEMS_PER_PAGE']
-    genre = request.args.get('genre')
+    query = request.args.get('q', '').strip()
+    genre = request.args.get('genre', '')
+    status = request.args.get('status', 'active')
+    sort_by = request.args.get('sort', 'recent')
     
-    filters = {'status': 'active'}
+    # Build filters
+    filters = {}
+    if status:
+        filters['status'] = status
     if genre:
         filters['genre'] = genre
     
+    # Set sort order
+    sort_mapping = {
+        'recent': [('created_at', -1)],
+        'title': [('title', 1)],
+        'views': [('views_count', -1)],
+        'wins': [('competition_wins', -1)]
+    }
+    sort_order = sort_mapping.get(sort_by, [('created_at', -1)])
+    
     skip = (page - 1) * per_page
-    books = Book.find_all(filters=filters, skip=skip, limit=per_page, sort=[('created_at', -1)])
-    total = Book.count(filters)
+    books = Book.search(query=query, filters=filters, skip=skip, limit=per_page, sort=sort_order)
+    total = Book.count_search(query=query, filters=filters)
     
     # Enrich with author info and ratings
     for book in books:
@@ -40,12 +55,19 @@ def list_books():
         book['author'] = author
         book['rating_info'] = Review.get_average_rating(str(book['_id']))
     
+    total_pages = (total + per_page - 1) // per_page
+    
+    # Get available genres for filter
+    from app import mongo
+    all_genres = mongo.db[Book.collection].distinct('genre')
+    
     if request.is_json:
         return jsonify({
             'books': [{
                 'id': str(b['_id']),
                 'title': b['title'],
                 'author': b['author']['full_name'] if b['author'] else 'Unknown',
+                'author_id': str(b['user_id']),
                 'genre': b.get('genre'),
                 'cover_image_url': b.get('cover_image_url'),
                 'rating': b['rating_info']['average'],
@@ -53,10 +75,21 @@ def list_books():
             } for b in books],
             'total': total,
             'page': page,
-            'per_page': per_page
+            'per_page': per_page,
+            'total_pages': total_pages
         }), 200
     
-    return render_template('books/list.html', books=books, page=page, total=total, per_page=per_page)
+    return render_template('books/list.html', 
+                         books=books, 
+                         page=page, 
+                         total=total, 
+                         per_page=per_page,
+                         total_pages=total_pages,
+                         query=query,
+                         genre=genre,
+                         status=status,
+                         sort_by=sort_by,
+                         all_genres=all_genres)
 
 
 @bp.route('/<book_id>', methods=['GET'])

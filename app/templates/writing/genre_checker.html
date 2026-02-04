@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Genre Checker - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="text-center mb-4"><i class="bi bi-bookmark-check"></i> Genre Convention Checker</h1>
+            <p class="text-center text-muted mb-4">Check if your manuscript matches genre expectations</p>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Genre</label>
+                            <select class="form-select" name="genre" required>
+                                <option value="Romance">Romance</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Science Fiction">Science Fiction</option>
+                                <option value="Thriller">Thriller</option>
+                                <option value="Horror">Horror</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Manuscript Sample (first 1000 words)</label>
+                            <textarea class="form-control font-monospace" name="manuscript_sample" 
+                                      rows="12" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-search"></i> Analyze
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {% if analysis_result %}
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title">Analysis Results</h5>
+                    
+                    <div class="mb-4">
+                        <h6>Genre Match Score</h6>
+                        <div class="progress" style="height: 30px;">
+                            {% set color = 'success' if analysis_result.match_percentage >= 70 else 'warning' if analysis_result.match_percentage >= 40 else 'danger' %}
+                            <div class="progress-bar bg-{{ color }}" role="progressbar" 
+                                 style="width: {{ analysis_result.match_percentage }}%">
+                                {{ analysis_result.match_percentage }}%
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if analysis_result.found_keywords %}
+                    <div class="mb-3">
+                        <h6>Genre Keywords Found:</h6>
+                        {% for keyword in analysis_result.found_keywords %}
+                        <span class="badge bg-success me-1">{{ keyword }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if analysis_result.suggestions %}
+                    <div class="alert alert-info">
+                        <h6>Suggestions:</h6>
+                        <ul class="mb-0">
+                            {% for suggestion in analysis_result.suggestions %}
+                            <li>{{ suggestion }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

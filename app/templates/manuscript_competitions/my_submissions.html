@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}My Competition Submissions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1><i class="fas fa-file-alt"></i> My Submissions</h1>
+    
+    {% if submissions %}
+    <div class="row mt-4">
+        {% for sub in submissions %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ sub.manuscript_title }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Competition:</strong> 
+                        <a href="{{ url_for('manuscript_competitions.detail', competition_id=sub.competition._id) }}">
+                            {{ sub.competition.title }}
+                        </a>
+                    </p>
+                    
+                    <p><strong>Genre:</strong> <span class="badge bg-secondary">{{ sub.genre }}</span></p>
+                    
+                    <p><strong>Word Count:</strong> {{ "{:,}".format(sub.word_count) }}</p>
+                    
+                    <p><strong>Submitted:</strong> {{ sub.submission_timestamp.strftime('%B %d, %Y') }}</p>
+                    
+                    <p><strong>Status:</strong>
+                        {% if sub.submission_status == 'winner' %}
+                        <span class="badge bg-success">Winner!</span>
+                        {% elif sub.submission_status == 'participant' %}
+                        <span class="badge bg-info">Participant</span>
+                        {% elif sub.submission_status == 'under_review' %}
+                        <span class="badge bg-warning">Under Review</span>
+                        {% else %}
+                        <span class="badge bg-secondary">{{ sub.submission_status|title }}</span>
+                        {% endif %}
+                    </p>
+                    
+                    {% if sub.submission_status == 'winner' and sub.winner_info %}
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-trophy"></i> Congratulations!</h6>
+                        <p><strong>Rank:</strong> {{ sub.winner_info.rank_position }}</p>
+                        <p><strong>Prize:</strong> {{ sub.winner_info.prize_awarded }}</p>
+                        <a href="{{ url_for('manuscript_competitions.my_wins') }}" class="btn btn-sm btn-success">
+                            View Winner Details
+                        </a>
+                    </div>
+                    {% elif sub.submission_status == 'participant' and sub.competition.status == 'completed' %}
+                    <div class="alert alert-info">
+                        Thank you for participating! Check the competition page to see the winners.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle"></i> You haven't submitted to any competitions yet.
+        <a href="{{ url_for('manuscript_competitions.browse') }}">Browse active competitions</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

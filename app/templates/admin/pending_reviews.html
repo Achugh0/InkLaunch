@@ -33,7 +33,9 @@
                     </td>
                     <td>
                         {% if review.reviewer %}
-                        {{ review.reviewer.full_name }}
+                        <a href="{{ url_for('users.get_user', user_id=review.reviewer._id) }}">
+                            {{ review.reviewer.full_name }}
+                        </a>
                         {% else %}
                         Unknown
                         {% endif %}

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}{{ competition.title }} - Competition{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('competitions_admin.list_competitions') }}">Competitions</a></li>
+            <li class="breadcrumb-item active">{{ competition.title }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ competition.title }}</h1>
+            
+            <!-- Status Badge -->
+            <div class="mb-3">
+                {% if competition.status == 'draft' %}
+                <span class="badge bg-secondary fs-6">Draft</span>
+                {% elif competition.status == 'accepting_submissions' %}
+                <span class="badge bg-success fs-6">Active - Accepting Submissions</span>
+                {% elif competition.status == 'closed' %}
+                <span class="badge bg-warning fs-6">Closed</span>
+                {% elif competition.status == 'evaluating' %}
+                <span class="badge bg-info fs-6">AI Evaluation in Progress</span>
+                {% elif competition.status == 'admin_review' %}
+                <span class="badge bg-primary fs-6">Ready for Winner Selection</span>
+                {% elif competition.status == 'completed' %}
+                <span class="badge bg-dark fs-6">Completed</span>
+                {% endif %}
+            </div>
+
+            <p>{{ competition.description }}</p>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    {% if competition.status == 'draft' %}
+                    <form method="POST" action="{{ url_for('competitions_admin.publish_competition', competition_id=competition._id) }}">
+                        <button type="submit" class="btn btn-success btn-sm w-100 mb-2">
+                            <i class="fas fa-play"></i> Publish Competition
+                        </button>
+                    </form>
+                    <a href="{{ url_for('competitions_admin.edit_competition', competition_id=competition._id) }}" 
+                       class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-edit"></i> Edit Details
+                    </a>
+                    {% elif competition.status == 'accepting_submissions' %}
+                    <form method="POST" action="{{ url_for('competitions_admin.close_competition', competition_id=competition._id) }}">
+                        <button type="submit" class="btn btn-warning btn-sm w-100">
+                            <i class="fas fa-stop"></i> Close Submissions
+                        </button>
+                    </form>
+                    {% elif competition.status == 'closed' %}
+                    <form method="POST" action="{{ url_for('competitions_admin.start_evaluation', competition_id=competition._id) }}">
+                        <button type="submit" class="btn btn-info btn-sm w-100">
+                            <i class="fas fa-robot"></i> Start AI Evaluation
+                        </button>
+                    </form>
+                    {% elif competition.status == 'admin_review' %}
+                    <a href="{{ url_for('competitions_admin.select_winners', competition_id=competition._id) }}" 
+                       class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-trophy"></i> Select Winners
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submissions List -->
+    <div class="mt-5">
+        <h3>Submissions ({{ submissions|length }})</h3>
+        
+        {% if submissions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Genre</th>
+                        <th>Word Count</th>
+                        <th>Status</th>
+                        <th>Score</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr>
+                        <td><strong>{{ sub.manuscript_title }}</strong></td>
+                        <td>
+                            {% if sub.author %}
+                            <a href="{{ url_for('users.get_user', user_id=sub.author._id) }}">
+                                {{ sub.author.full_name }}
+                            </a>
+                            {% else %}
+                            Unknown
+                            {% endif %}
+                        </td>
+                        <td><span class="badge bg-secondary">{{ sub.genre }}</span></td>
+                        <td>{{ "{:,}".format(sub.word_count) }}</td>
+                        <td>
+                            {% if sub.submission_status == 'winner' %}
+                            <span class="badge bg-success">Winner</span>
+                            {% elif sub.submission_status == 'under_review' %}
+                            <span class="badge bg-info">Evaluated</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ sub.submission_status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if sub.evaluation %}
+                            <span class="badge bg-primary">{{ "%.1f"|format(sub.evaluation.overall_score) }}/10</span>
+                            <button class="btn btn-sm btn-link p-0 ms-1" type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#eval-{{ loop.index }}"
+                                    title="Show AI evaluation details">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ sub.submission_timestamp.strftime('%b %d, %Y') }}</small></td>
+                    </tr>
+                    {% if sub.evaluation %}
+                    <tr class="collapse" id="eval-{{ loop.index }}">
+                        <td colspan="7" class="bg-light">
+                            <div class="p-3">
+                                <h6 class="text-primary mb-3">
+                                    <i class="fas fa-robot"></i> AI Evaluation Breakdown
+                                    <small class="text-muted">(Admin Only)</small>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body text-center">
+                                                <h6 class="text-muted mb-2">Plot/Structure</h6>
+                                                <h3 class="mb-0">{{ "%.1f"|format(sub.evaluation.scores.plot_story_structure) }}</h3>
+                                                <div class="progress mt-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-info" 
+                                                         style="width: {{ sub.evaluation.scores.plot_story_structure * 10 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body text-center">
+                                                <h6 class="text-muted mb-2">Character Dev</h6>
+                                                <h3 class="mb-0">{{ "%.1f"|format(sub.evaluation.scores.character_development) }}</h3>
+                                                <div class="progress mt-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: {{ sub.evaluation.scores.character_development * 10 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body text-center">
+                                                <h6 class="text-muted mb-2">Writing Quality</h6>
+                                                <h3 class="mb-0">{{ "%.1f"|format(sub.evaluation.scores.writing_quality_style) }}</h3>
+                                                <div class="progress mt-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-warning" 
+                                                         style="width: {{ sub.evaluation.scores.writing_quality_style * 10 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body text-center">
+                                                <h6 class="text-muted mb-2">Originality</h6>
+                                                <h3 class="mb-0">{{ "%.1f"|format(sub.evaluation.scores.originality_creativity) }}</h3>
+                                                <div class="progress mt-2" style="height: 5px;">
+                                                    <div class="progress-bar bg-danger" 
+                                                         style="width: {{ sub.evaluation.scores.originality_creativity * 10 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if sub.evaluation.detailed_feedback %}
+                                <div class="mt-3">
+                                    <h6 class="text-muted">Detailed Feedback:</h6>
+                                    <div class="card bg-white">
+                                        <div class="card-body">
+                                            <p class="mb-0" style="white-space: pre-line;">{{ sub.evaluation.detailed_feedback }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <div class="mt-3 text-muted">
+                                    <small>
+                                        <i class="fas fa-clock"></i> Evaluated: {{ sub.evaluation.evaluation_timestamp.strftime('%b %d, %Y at %I:%M %p') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No submissions yet.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Winners Section -->
+    {% if winners %}
+    <div class="mt-5">
+        <h3><i class="fas fa-trophy text-warning"></i> Winners</h3>
+        
+        <div class="row">
+            {% for winner in winners %}
+            <div class="col-md-4 mb-3">
+                <div class="card border-warning">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0">
+                            {% if winner.rank_position == 1 %}
+                            <i class="fas fa-trophy"></i> 1st Place
+                            {% elif winner.rank_position == 2 %}
+                            <i class="fas fa-medal"></i> 2nd Place
+                            {% elif winner.rank_position == 3 %}
+                            <i class="fas fa-award"></i> 3rd Place
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Author:</strong> {{ winner.author.full_name }}</p>
+                        <p><strong>Score:</strong> {{ "%.1f"|format(winner.final_score) }}/10</p>
+                        <p><strong>Prize:</strong> {{ winner.prize_awarded }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

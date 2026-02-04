@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Select Winners - {{ competition.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Select Winners: {{ competition.title }}</h1>
+    
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> This action cannot be undone. Winners will be notified automatically.
+    </div>
+    
+    <form method="POST">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">AI Evaluation Results (Ranked by Score)</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Select top 1-3 submissions as winners. Check the boxes for your selected winners.</p>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Rank</th>
+                                <th>Score</th>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Genre</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eval in evaluations %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="form-check-input" name="winner_ids" 
+                                           value="{{ eval.submission._id }}" id="winner_{{ loop.index }}">
+                                </td>
+                                <td><strong>{{ loop.index }}</strong></td>
+                                <td>
+                                    <span class="badge bg-primary fs-6">{{ "%.1f"|format(eval.overall_score) }}/10</span>
+                                </td>
+                                <td>
+                                    <label for="winner_{{ loop.index }}">
+                                        <strong>{{ eval.submission.manuscript_title }}</strong>
+                                    </label>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('users.get_user', user_id=eval.author._id) }}">
+                                        {{ eval.author.full_name }}
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary">{{ eval.submission.genre }}</span></td>
+                                <td>
+                                    <small>{{ "%.1f"|format(eval.confidence_score) }}/10</small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="7">
+                                    <div class="ms-4">
+                                        <strong>Strengths:</strong>
+                                        <ul class="mb-1">
+                                            {% for strength in eval.strengths_identified[:3] %}
+                                            <li><small>{{ strength }}</small></li>
+                                            {% endfor %}
+                                        </ul>
+                                        <strong>Weaknesses:</strong>
+                                        <ul class="mb-1">
+                                            {% for weakness in eval.weaknesses_identified[:3] %}
+                                            <li><small>{{ weakness }}</small></li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('Are you sure you want to announce these winners? This action cannot be undone.')">
+                <i class="fas fa-trophy"></i> Announce Winners
+            </button>
+            <a href="{{ url_for('competitions_admin.view_competition', competition_id=competition._id) }}" 
+               class="btn btn-outline-secondary">
+                Back to Competition
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

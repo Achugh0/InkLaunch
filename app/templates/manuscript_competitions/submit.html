@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Submit to {{ competition.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Submit Your Manuscript</h1>
+    <p class="lead">Competition: {{ competition.title }}</p>
+    
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> <strong>Important:</strong> You can either upload a new manuscript or choose from your existing books.
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data" id="submissionForm">
+        <!-- Submission Type Selector -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Choose Submission Type</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group w-100" role="group">
+                    <input type="radio" class="btn-check" name="submission_type" id="type_new" value="new" checked>
+                    <label class="btn btn-outline-primary" for="type_new">
+                        <i class="fas fa-upload"></i> Upload New Manuscript
+                    </label>
+                    
+                    <input type="radio" class="btn-check" name="submission_type" id="type_existing" value="existing">
+                    <label class="btn btn-outline-primary" for="type_existing">
+                        <i class="fas fa-book"></i> Use Existing Book
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Existing Book Selection -->
+        <div class="card mb-3" id="existingBookSection" style="display: none;">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Select Your Book</h5>
+            </div>
+            <div class="card-body">
+                {% if user_books %}
+                <div class="mb-3">
+                    <label for="existing_book_id" class="form-label">Choose from your books *</label>
+                    <select class="form-select" id="existing_book_id" name="existing_book_id">
+                        <option value="">Select a book...</option>
+                        {% for book in user_books %}
+                        <option value="{{ book._id }}" 
+                                data-title="{{ book.title }}"
+                                data-genre="{{ book.genre }}"
+                                data-description="{{ book.description }}">
+                            {{ book.title }} ({{ book.genre }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div id="bookPreview" class="alert alert-secondary" style="display: none;">
+                    <h6>Selected Book Details:</h6>
+                    <p><strong>Title:</strong> <span id="previewTitle"></span></p>
+                    <p><strong>Genre:</strong> <span id="previewGenre"></span></p>
+                    <p><strong>Description:</strong> <span id="previewDescription"></span></p>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> You don't have any books in your library yet. 
+                    <a href="{{ url_for('books.create_book') }}" target="_blank">Add a book</a> or upload a new manuscript.
+                </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="author_statement_existing" class="form-label">Author Statement (Optional)</label>
+                    <textarea class="form-control" id="author_statement_existing" name="author_statement" rows="4"
+                              placeholder="Tell us why you wrote this book, what inspired you, or anything else you'd like us to know."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- New Manuscript Upload Section -->
+        <div class="card" id="newManuscriptSection">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">New Manuscript Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="manuscript_title" class="form-label">Manuscript Title *</label>
+                    <input type="text" class="form-control" id="manuscript_title" name="manuscript_title" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="genre" class="form-label">Genre *</label>
+                    <select class="form-select" id="genre" name="genre" required>
+                        <option value="">Select genre...</option>
+                        {% for genre in competition.genre_categories %}
+                        <option value="{{ genre }}">{{ genre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="word_count" class="form-label">Word Count *</label>
+                    <input type="number" class="form-control" id="word_count" name="word_count" min="1" required>
+                    <small class="text-muted">Approximate word count of your manuscript</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="synopsis" class="form-label">Synopsis *</label>
+                    <textarea class="form-control" id="synopsis" name="synopsis" rows="6" required
+                              placeholder="Provide a compelling synopsis of your manuscript (200-500 words)"></textarea>
+                    <small class="text-muted">This will be used for AI evaluation along with your manuscript.</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="author_statement" class="form-label">Author Statement (Optional)</label>
+                    <textarea class="form-control" id="author_statement" name="author_statement" rows="4"
+                              placeholder="Tell us why you wrote this book, what inspired you, or anything else you'd like us to know."></textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="manuscript_file" class="form-label">Upload Manuscript *</label>
+                    <input type="file" class="form-control" id="manuscript_file" name="manuscript_file" 
+                           accept=".pdf,.docx,.doc,.txt" required>
+                    <small class="text-muted">Accepted formats: PDF, DOCX, TXT (Max 10MB)</small>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="agree_terms" required>
+                        <label class="form-check-label" for="agree_terms">
+                            I confirm that I own the rights to this work and agree to the competition terms and conditions. *
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if competition.entry_fee_amount > 0 %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Entry Fee:</strong> ₹{{ competition.entry_fee_amount }}
+                    <br><small>Payment processing will be available after submission validation.</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4 d-grid gap-2">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-paper-plane"></i> Submit My Entry
+            </button>
+            <a href="{{ url_for('manuscript_competitions.detail', competition_id=competition._id) }}" 
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Toggle between new and existing book sections
+document.addEventListener('DOMContentLoaded', function() {
+    const submissionTypeRadios = document.querySelectorAll('input[name="submission_type"]');
+    const existingBookSection = document.getElementById('existingBookSection');
+    const newManuscriptSection = document.getElementById('newManuscriptSection');
+    const bookSelect = document.getElementById('existing_book_id');
+    const bookPreview = document.getElementById('bookPreview');
+    
+    // Handle submission type toggle
+    submissionTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'existing') {
+                existingBookSection.style.display = 'block';
+                newManuscriptSection.style.display = 'none';
+                // Make existing book fields required
+                bookSelect.setAttribute('required', 'required');
+                // Remove required from new manuscript fields
+                document.getElementById('title').removeAttribute('required');
+                document.getElementById('manuscript_file').removeAttribute('required');
+                document.getElementById('synopsis').removeAttribute('required');
+            } else {
+                existingBookSection.style.display = 'none';
+                newManuscriptSection.style.display = 'block';
+                // Remove required from existing book field
+                bookSelect.removeAttribute('required');
+                // Make new manuscript fields required
+                document.getElementById('title').setAttribute('required', 'required');
+                document.getElementById('manuscript_file').setAttribute('required', 'required');
+                document.getElementById('synopsis').setAttribute('required', 'required');
+            }
+        });
+    });
+    
+    // Handle book selection preview
+    bookSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (this.value) {
+            const bookTitle = selectedOption.getAttribute('data-title');
+            const bookGenre = selectedOption.getAttribute('data-genre');
+            const bookDescription = selectedOption.getAttribute('data-description');
+            const bookWordCount = selectedOption.getAttribute('data-wordcount');
+            
+            bookPreview.innerHTML = `
+                <div class="alert alert-info">
+                    <h6 class="alert-heading">${bookTitle}</h6>
+                    <p class="mb-1"><strong>Genre:</strong> ${bookGenre}</p>
+                    <p class="mb-1"><strong>Word Count:</strong> ${bookWordCount || 'Not specified'}</p>
+                    ${bookDescription ? `<p class="mb-0"><strong>Description:</strong> ${bookDescription}</p>` : ''}
+                </div>
+            `;
+            bookPreview.style.display = 'block';
+        } else {
+            bookPreview.style.display = 'none';
+        }
+    });
+    
+    // Initialize display based on default selection
+    const defaultSelection = document.querySelector('input[name="submission_type"]:checked');
+    if (defaultSelection && defaultSelection.value === 'existing') {
+        existingBookSection.style.display = 'block';
+        newManuscriptSection.style.display = 'none';
+    } else {
+        existingBookSection.style.display = 'none';
+        newManuscriptSection.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

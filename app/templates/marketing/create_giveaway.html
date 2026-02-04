@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Create Giveaway - InkLaunch{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4"><i class="bi bi-gift"></i> Create Book Giveaway</h1>
+    
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="book_id" class="form-label">Select Book</label>
+                            <select class="form-select" id="book_id" name="book_id" required>
+                                <option value="">Choose a book...</option>
+                                {% for book in books %}
+                                <option value="{{ book._id }}">{{ book.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Giveaway Title</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   placeholder="e.g., Free Copy of My New Book!" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="4" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="num_winners" class="form-label">Number of Winners</label>
+                                <input type="number" class="form-control" id="num_winners" name="num_winners" 
+                                       value="1" min="1" max="10" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="duration_days" class="form-label">Duration (days)</label>
+                                <input type="number" class="form-control" id="duration_days" name="duration_days" 
+                                       value="7" min="1" max="30" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-rocket-takeoff"></i> Launch Giveaway
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
