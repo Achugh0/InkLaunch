@@ -36,7 +36,16 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
     
     # Initialize extensions
-    mongo.init_app(app)
+    try:
+        mongo.init_app(app)
+        # Test MongoDB connection
+        with app.app_context():
+            if mongo.db is None:
+                app.logger.warning("MongoDB connection failed - mongo.db is None. Check MONGODB_URI environment variable.")
+    except Exception as e:
+        app.logger.error(f"Failed to initialize MongoDB: {e}")
+        app.logger.error("Make sure MONGODB_URI is set in your environment variables.")
+    
     bcrypt.init_app(app)
     jwt.init_app(app)
     mail.init_app(app)

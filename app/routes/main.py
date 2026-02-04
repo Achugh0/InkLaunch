@@ -24,11 +24,18 @@ def index():
             book['author'] = author
         
         # Get stats for homepage
-        stats = {
-            'total_users': mongo.db.users.count_documents({}),
-            'total_books': mongo.db.books.count_documents({}),
-            'total_reviews': mongo.db.reviews.count_documents({})
-        }
+        if mongo.db is not None:
+            stats = {
+                'total_users': mongo.db.users.count_documents({}),
+                'total_books': mongo.db.books.count_documents({}),
+                'total_reviews': mongo.db.reviews.count_documents({})
+            }
+        else:
+            stats = {
+                'total_users': 0,
+                'total_books': 0,
+                'total_reviews': 0
+            }
     except Exception as e:
         # If database is not available, show empty page
         current_app.logger.error(f"Database connection error: {e}")
