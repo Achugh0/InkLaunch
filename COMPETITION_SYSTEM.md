@@ -136,7 +136,7 @@ Admins can customize these weights when creating competitions.
 ## Testing the System
 
 ### As Admin:
-1. Login as admin (ashchugh@gmail.com)
+1. Login as admin
 2. Navigate to Admin Dashboard
 3. Click "Manage Competitions"
 4. Create a new competition
@@ -175,10 +175,6 @@ Required config variables (already set):
 - Author can only see own submissions
 - MongoDB ObjectId validation
 - No manuscript content visible to authors (only synopsis used for display)
-
-## Support
-
-For issues or questions, contact: ashchugh@gmail.com
 
 ---
 

@@ -27,7 +27,7 @@ class Config:
     JWT_HEADER_TYPE = 'Bearer'
     
     # Admin
-    ADMIN_EMAILS = os.getenv('ADMIN_EMAILS', 'ashchugh@gmail.com,achugh@hotmail.com').split(',')
+    ADMIN_EMAILS = os.getenv('ADMIN_EMAILS', 'admin@example.com').split(',')
     
     # AWS S3
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')

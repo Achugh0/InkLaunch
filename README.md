@@ -45,5 +45,3 @@ pytest
 # Run with coverage
 pytest --cov=app tests/
 \`\`\`
-
-**Admin Emails**: ashchugh@gmail.com, achugh@hotmail.com

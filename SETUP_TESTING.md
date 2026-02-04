@@ -102,7 +102,7 @@ curl -X POST http://localhost:5000/auth/login \
 curl -X POST http://localhost:5000/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "ashchugh@gmail.com",
+    "email": "admin@example.com",
     "password": "Admin123!@#",
     "full_name": "Admin User"
   }'
