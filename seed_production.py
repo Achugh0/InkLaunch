@@ -1,10 +1,9 @@
-"""Seed database with sample books."""
-from app import create_app, mongo
-from app.models import User, Book
+"""Seed production database with sample books."""
+from pymongo import MongoClient
 from datetime import datetime
 import os
 
-# Sample book data based on the covers provided
+# Sample book data with Cloudinary URLs
 SAMPLE_BOOKS = [
     {
         'title': 'The Weight of Wings',
@@ -62,58 +61,83 @@ SAMPLE_BOOKS = [
     }
 ]
 
-def seed_database():
-    """Seed the database with sample books."""
-    app = create_app()
+def seed_production():
+    """Seed production database."""
+    mongodb_uri = os.environ.get('MONGODB_URI')
+    if not mongodb_uri:
+        print("❌ Error: MONGODB_URI environment variable not set")
+        return
     
-    with app.app_context():
-        # Create author account if doesn't exist
-        author_email = 'ashchugh@gmail.com'
-        author = User.find_by_email(author_email)
+    client = MongoClient(mongodb_uri)
+    db = client.get_database()
+    
+    print("=" * 70)
+    print(" SEEDING PRODUCTION DATABASE")
+    print("=" * 70)
+    print()
+    
+    # Get or create author
+    author = db.users.find_one({'email': 'ashchugh@gmail.com'})
+    if not author:
+        print("❌ Error: Author account not found. Create admin user first.")
+        return
+    
+    author_id = author['_id']
+    print(f"✓ Author: {author.get('full_name', 'Unknown')}")
+    print()
+    
+    # Add books
+    added = 0
+    updated = 0
+    
+    for book_data in SAMPLE_BOOKS:
+        existing = db.books.find_one({
+            'title': book_data['title'],
+            'user_id': author_id
+        })
         
-        if not author:
-            print(f"Creating author account: {author_email}")
-            author_id = User.create(
-                email=author_email,
-                password='InkLaunch2026!',
-                full_name='Ashish Chugh',
-                bio='Author of psychological fiction and corporate satire. Exploring the human condition through narrative and the workplace through wit.',
-                role='admin'
-            )
-            author = User.find_by_id(str(author_id))
+        if existing:
+            # Update cover_url if it's different
+            if existing.get('cover_url') != book_data['cover_url']:
+                db.books.update_one(
+                    {'_id': existing['_id']},
+                    {'$set': {'cover_url': book_data['cover_url']}}
+                )
+                print(f"📚 Updated: {book_data['title']}")
+                print(f"   🔗 {book_data['cover_url'][:60]}...")
+                updated += 1
+            else:
+                print(f"✓ Exists: {book_data['title']}")
         else:
-            print(f"Author account already exists: {author_email}")
-        
-        # Add sample books
-        for book_data in SAMPLE_BOOKS:
-            # Check if book already exists
-            existing = mongo.db.books.find_one({
+            book_doc = {
                 'title': book_data['title'],
-                'user_id': author['_id']
-            })
-            
-            if existing:
-                print(f"Book already exists: {book_data['title']}")
-                continue
-            
-            print(f"Adding book: {book_data['title']}")
-            
-            book_create_data = {
-                'title': book_data['title'],
-                'subtitle': book_data['subtitle'],
+                'subtitle': book_data.get('subtitle', ''),
                 'description': book_data['description'],
                 'genre': book_data['genre'],
                 'page_count': book_data['page_count'],
-                'cover_image_url': book_data['cover_url'],
-                'language': 'English',
+                'cover_url': book_data['cover_url'],
+                'user_id': author_id,
+                'status': 'published',
                 'publication_date': datetime.utcnow(),
-                'status': 'active'
+                'created_at': datetime.utcnow(),
+                'updated_at': datetime.utcnow(),
+                'views': 0,
+                'total_rating': 0,
+                'number_of_reviews': 0,
+                'average_rating': 0.0
             }
             
-            Book.create(str(author['_id']), book_create_data)
-        
-        print("\n✓ Database seeding completed!")
-        print(f"✓ Total books in repository: {mongo.db.books.count_documents({})}")
+            db.books.insert_one(book_doc)
+            print(f"📚 Added: {book_data['title']}")
+            print(f"   🔗 {book_data['cover_url'][:60]}...")
+            added += 1
+        print()
+    
+    print("=" * 70)
+    print(f"✓ Added: {added} books")
+    print(f"✓ Updated: {updated} books")
+    print(f"✓ Total books: {db.books.count_documents({'user_id': author_id})}")
+    print("=" * 70)
 
 if __name__ == '__main__':
-    seed_database()
+    seed_production()
