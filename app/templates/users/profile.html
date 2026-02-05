@@ -10,7 +10,7 @@
             <div class="card">
                 <div class="card-body text-center">
                     {% if user.profile_image_url %}
-                    <img src="{{ user.profile_image_url }}" alt="{{ user.full_name }}" 
+                    <img src="{{ user.profile_image_url|media_url }}" alt="{{ user.full_name }}" 
                          class="rounded-circle img-fluid mb-3" style="width: 200px; height: 200px; object-fit: cover;">
                     {% else %}
                     <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center mb-3" 

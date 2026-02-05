@@ -178,7 +178,7 @@
             <div class="card book-card-modern border-0 shadow h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'" style="cursor: pointer;">
                 <div class="position-relative overflow-hidden">
                     {% if book.cover_image_url %}
-                    <img src="{{ book.cover_image_url }}" class="card-img-top" alt="{{ book.title }}" style="height: 320px; object-fit: cover;">
+                    <img src="{{ book.cover_image_url|media_url }}" class="card-img-top" alt="{{ book.title }}" style="height: 320px; object-fit: cover;">
                     {% else %}
                     <div class="card-img-top d-flex align-items-center justify-content-center position-relative" 
                          style="height: 320px; background: linear-gradient(135deg, {{ ['#f093fb 0%, #f5576c', '#4facfe 0%, #00f2fe', '#43e97b 0%, #38f9d7', '#fa709a 0%, #fee140', '#667eea 0%, #764ba2', '#ff6e7f 0%, #bfe9ff'][loop.index0 % 6] }} 100%);">
@@ -395,7 +395,7 @@
             <div class="card book-card h-100 border-0 shadow-sm" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'">
                 <div class="position-relative">
                     {% if book.cover_image_url %}
-                    <img src="{{ book.cover_image_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
+                    <img src="{{ book.cover_image_url|media_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
                     {% else %}
                     <div class="book-cover bg-gradient d-flex align-items-center justify-content-center" 
                          style="background: linear-gradient(135deg, {{ ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'][loop.index0 % 6] }} 0%, {{ ['#764ba2', '#667eea', '#4facfe', '#00f2fe', '#38f9d7', '#fee140'][loop.index0 % 6] }} 100%);">

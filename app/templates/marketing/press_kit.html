@@ -40,7 +40,7 @@
                             <div class="row">
                                 {% for book in books %}
                                 <div class="col-md-3 mb-3">
-                                    <img src="{{ book.cover_image_url or '/static/images/default-book-cover.png' }}" 
+                                     <img src="{{ (book.cover_image_url or '/static/images/default-book-cover.png')|media_url }}" 
                                          class="img-fluid rounded" alt="{{ book.title }}">
                                     <small class="d-block text-center mt-1">{{ book.title }}</small>
                                 </div>

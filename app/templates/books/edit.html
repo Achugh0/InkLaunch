@@ -37,7 +37,7 @@
                             {% if book.cover_image_url %}
                             <div class="mb-2">
                                 <small class="text-muted d-block">Current cover:</small>
-                                <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" 
+                                  <img src="{{ book.cover_image_url|media_url }}" alt="{{ book.title }}" 
                                      class="img-thumbnail" style="max-height: 150px;">
                             </div>
                             {% endif %}

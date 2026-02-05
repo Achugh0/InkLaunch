@@ -8,7 +8,7 @@
     <div class="row mb-4">
         <div class="col-md-3 text-center">
             {% if user.profile_image_url %}
-            <img src="{{ user.profile_image_url }}" class="img-fluid rounded-circle shadow" alt="{{ user.full_name }}" style="width: 200px; height: 200px; object-fit: cover;">
+            <img src="{{ user.profile_image_url|media_url }}" class="img-fluid rounded-circle shadow" alt="{{ user.full_name }}" style="width: 200px; height: 200px; object-fit: cover;">
             {% else %}
             <div class="bg-gradient text-white d-flex align-items-center justify-content-center rounded-circle mx-auto shadow" 
                  style="width: 200px; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -191,7 +191,7 @@
                 <div class="col-md-3 col-sm-6 mb-4">
                     <div class="card book-card h-100 shadow-sm" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'" style="cursor: pointer;">
                         {% if book.cover_image_url %}
-                        <img src="{{ book.cover_image_url }}" class="card-img-top" style="height: 300px; object-fit: cover;" alt="{{ book.title }}">
+                        <img src="{{ book.cover_image_url|media_url }}" class="card-img-top" style="height: 300px; object-fit: cover;" alt="{{ book.title }}">
                         {% else %}
                         <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 300px;">
                             <i class="bi bi-book" style="font-size: 4rem;"></i>

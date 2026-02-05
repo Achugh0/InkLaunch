@@ -24,7 +24,7 @@
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 shadow-sm">
                 {% if giveaway.book and giveaway.book.cover_image_url %}
-                <img src="{{ giveaway.book.cover_image_url }}" class="card-img-top" alt="{{ giveaway.book.title }}" style="height: 300px; object-fit: cover;">
+                <img src="{{ giveaway.book.cover_image_url|media_url }}" class="card-img-top" alt="{{ giveaway.book.title }}" style="height: 300px; object-fit: cover;">
                 {% endif %}
                 <div class="card-body">
                     <h5 class="card-title">{{ giveaway.title }}</h5>

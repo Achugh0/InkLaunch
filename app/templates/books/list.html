@@ -12,7 +12,7 @@
         <div class="col-md-3 col-sm-6 mb-4">
             <div class="card book-card h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'">
                 {% if book.cover_image_url %}
-                <img src="{{ book.cover_image_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
+                <img src="{{ book.cover_image_url|media_url }}" class="card-img-top book-cover" alt="{{ book.title }}">
                 {% else %}
                 <div class="bg-secondary book-cover d-flex align-items-center justify-content-center">
                     <i class="bi bi-book text-white" style="font-size: 4rem;"></i>

@@ -50,6 +50,16 @@ def create_app(config_name=None):
     jwt.init_app(app)
     mail.init_app(app)
     
+    # Initialize security headers
+    from app.security import SecurityHeaders
+    SecurityHeaders.init_app(app)
+    
+    # Add CSRF token to all templates
+    @app.context_processor
+    def inject_csrf_token():
+        from app.security import generate_csrf_token
+        return dict(csrf_token=generate_csrf_token)
+    
     # Set absolute path for upload folder
     if not os.path.isabs(app.config['UPLOAD_FOLDER']):
         app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, '..', app.config['UPLOAD_FOLDER'])
@@ -65,6 +75,36 @@ def create_app(config_name=None):
         if not text:
             return ''
         return markdown.markdown(text, extensions=['nl2br', 'fenced_code', 'tables'])
+
+    def normalize_media_url(url):
+        """Normalize media URLs stored in the database."""
+        if not url:
+            return ''
+        normalized = url.strip()
+        if normalized.startswith('//'):
+            return f"https:{normalized}"
+        if normalized.startswith('http://'):
+            return f"https://{normalized[len('http://'):]}"
+        if normalized.startswith('https://'):
+            return normalized
+        if normalized.startswith('/'):
+            return normalized
+        if normalized.startswith('static/'):
+            return f"/{normalized}"
+        if normalized.startswith('uploads/'):
+            return f"/{normalized}"
+        if normalized.startswith('res.cloudinary.com/') or normalized.startswith('cloudinary.com/'):
+            return f"https://{normalized}"
+
+        bucket = app.config.get('AWS_S3_BUCKET_NAME')
+        if bucket:
+            region = app.config.get('AWS_REGION', 'us-east-1')
+            return f"https://{bucket}.s3.{region}.amazonaws.com/{normalized}"
+
+        return f"/{normalized}"
+
+    app.add_template_filter(normalize_media_url, 'media_url')
+    app.jinja_env.globals['media_url'] = normalize_media_url
     
     # Register blueprints
     from app.routes import auth, books, reviews, users, admin, articles, tools, competitions, services

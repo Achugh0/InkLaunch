@@ -26,7 +26,7 @@
                 <tr>
                     <td>
                         {% if book.cover_image_url %}
-                        <img src="{{ book.cover_image_url }}" alt="{{ book.title }}" 
+                            <img src="{{ book.cover_image_url|media_url }}" alt="{{ book.title }}" 
                              style="width: 40px; height: 60px; object-fit: cover;">
                         {% else %}
                         <div style="width: 40px; height: 60px; background: #ddd;"></div>

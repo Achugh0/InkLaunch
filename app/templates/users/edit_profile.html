@@ -19,7 +19,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label"><strong>Banner Image</strong></label>
                                 {% if user.banner_image_url %}
-                                <img src="{{ user.banner_image_url }}" alt="Banner" class="img-fluid mb-2 rounded" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                <img src="{{ user.banner_image_url|media_url }}" alt="Banner" class="img-fluid mb-2 rounded" style="max-height: 150px; width: 100%; object-fit: cover;">
                                 {% else %}
                                 <div class="bg-secondary text-white text-center p-5 mb-2 rounded">
                                     <i class="bi bi-image" style="font-size: 48px;"></i>
@@ -34,7 +34,7 @@
                                 <label class="form-label"><strong>Profile Photo</strong></label>
                                 <div class="text-center">
                                     {% if user.profile_image_url %}
-                                    <img src="{{ user.profile_image_url }}" alt="{{ user.full_name }}" 
+                                     <img src="{{ user.profile_image_url|media_url }}" alt="{{ user.full_name }}" 
                                          class="rounded-circle img-fluid mb-2" style="width: 150px; height: 150px; object-fit: cover;" id="profilePreview">
                                     {% else %}
                                     <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-2" 
