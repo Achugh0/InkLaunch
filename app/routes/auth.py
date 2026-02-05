@@ -158,6 +158,7 @@ def login():
     session['user_id'] = str(user['_id'])
     session['user_email'] = user['email']
     session['user_role'] = user['role']
+    session['user_full_name'] = user.get('full_name', user['email'])
     
     # Create session record and log login
     session_id = UserSession.create_session(
