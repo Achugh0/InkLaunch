@@ -30,12 +30,19 @@ def index():
                 'total_books': mongo.db.books.count_documents({}),
                 'total_reviews': mongo.db.reviews.count_documents({})
             }
+            top_reviewers = list(mongo.db.reviews.aggregate([
+                {'$match': {'status': 'approved'}},
+                {'$group': {'_id': '$reviewer_id', 'review_count': {'$sum': 1}}},
+                {'$sort': {'review_count': -1}},
+                {'$limit': 6}
+            ]))
         else:
             stats = {
                 'total_users': 0,
                 'total_books': 0,
                 'total_reviews': 0
             }
+            top_reviewers = []
     except Exception as e:
         # If database is not available, show empty page
         current_app.logger.error(f"Database connection error: {e}")
@@ -45,8 +52,19 @@ def index():
             'total_books': 0,
             'total_reviews': 0
         }
+        top_reviewers = []
     
-    return render_template('index.html', books=books, stats=stats)
+    enriched_reviewers = []
+    for item in top_reviewers:
+        reviewer = User.find_by_id(str(item['_id']))
+        if not reviewer:
+            continue
+        enriched_reviewers.append({
+            'reviewer': reviewer,
+            'review_count': item['review_count']
+        })
+
+    return render_template('index.html', books=books, stats=stats, top_reviewers=enriched_reviewers)
 
 
 @bp.route('/dashboard')

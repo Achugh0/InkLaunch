@@ -377,6 +377,37 @@
     </div>
 </div>
 
+{% if top_reviewers %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-stars text-info"></i> Top Reviewers
+        </h2>
+    </div>
+    <div class="row g-4">
+        {% for item in top_reviewers %}
+        <div class="col-lg-2 col-md-3 col-sm-4 col-6">
+            <a href="{{ url_for('users.get_user', user_id=item.reviewer._id) }}" class="text-decoration-none text-dark">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body">
+                        {% if item.reviewer.profile_image_url %}
+                        <img src="{{ item.reviewer.profile_image_url|media_url }}" alt="{{ item.reviewer.full_name }}" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-gradient text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bi bi-person" style="font-size: 2rem;"></i>
+                        </div>
+                        {% endif %}
+                        <h6 class="fw-bold text-truncate" title="{{ item.reviewer.full_name }}">{{ item.reviewer.full_name }}</h6>
+                        <div class="text-muted small">{{ item.review_count }} reviews</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="container my-5">
     <!-- Recently Added Books -->
     <div class="d-flex justify-content-between align-items-center mb-4">
