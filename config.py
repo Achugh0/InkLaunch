@@ -35,6 +35,11 @@ class Config:
     AWS_S3_BUCKET_NAME = os.getenv('AWS_S3_BUCKET_NAME', 'inklaunch-book-covers')
     AWS_REGION = os.getenv('AWS_REGION', 'us-east-1')
     
+    # Cloudinary (alternative to S3)
+    CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME', '')
+    CLOUDINARY_API_KEY = os.getenv('CLOUDINARY_API_KEY', '')
+    CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET', '')
+    
     # OpenAI
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
     AI_MODEL = os.getenv('AI_MODEL', 'gpt-4-turbo')

@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify, render_template, redirect, url_fo
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Book, User, Review
 from app.services.s3_service import s3_service
+from app.services.cloudinary_service import cloudinary_service
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 import os
@@ -171,13 +172,19 @@ def create_book():
         file = request.files['cover_image']
         if file and file.filename and allowed_file(file.filename):
             try:
-                # Try S3 upload first
-                if s3_service.is_s3_configured():
+                # Try Cloudinary first (recommended for production)
+                if cloudinary_service._ensure_config():
+                    cover_image_url = cloudinary_service.upload_file(file, folder='book-covers')
+                    if not cover_image_url:
+                        raise Exception("Cloudinary upload returned None")
+                # Try S3 as fallback
+                elif s3_service.is_s3_configured():
                     cover_image_url = s3_service.upload_file(file, folder='book-covers')
                     if not cover_image_url:
                         raise Exception("S3 upload returned None")
                 else:
-                    # Fallback to local storage (for development)
+                    # Fallback to local storage (for development only - not for production)
+                    current_app.logger.warning("Using local storage - images will not persist on Render!")
                     filename = secure_filename(file.filename)
                     filename = f"{datetime.utcnow().timestamp()}_{filename}"
                     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
@@ -301,8 +308,17 @@ def edit_book(book_id):
         file = request.files['cover_image']
         if file and file.filename and allowed_file(file.filename):
             try:
-                # Try S3 upload first
-                if s3_service.is_s3_configured():
+                # Try Cloudinary first (recommended for production)
+                if cloudinary_service._ensure_config():
+                    cover_image_url = cloudinary_service.upload_file(file, folder='book-covers')
+                    if cover_image_url:
+                        update_data['cover_image_url'] = cover_image_url
+                        # Optionally delete old image from Cloudinary if it exists
+                        old_url = book.get('cover_image_url')
+                        if old_url and 'cloudinary.com' in old_url:
+                            cloudinary_service.delete_file(old_url)
+                # Try S3 as fallback
+                elif s3_service.is_s3_configured():
                     cover_image_url = s3_service.upload_file(file, folder='book-covers')
                     if cover_image_url:
                         update_data['cover_image_url'] = cover_image_url
@@ -311,10 +327,12 @@ def edit_book(book_id):
                         if old_url and 's3.amazonaws.com' in old_url:
                             s3_service.delete_file(old_url)
                 else:
-                    # Fallback to local storage (for development)
+                    # Fallback to local storage (for development only - not for production)
+                    current_app.logger.warning("Using local storage - images will not persist on Render!")
                     filename = secure_filename(file.filename)
                     filename = f"{datetime.utcnow().timestamp()}_{filename}"
                     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
                     file.save(filepath)
                     update_data['cover_image_url'] = f"/uploads/{filename}"
             except Exception as e:
