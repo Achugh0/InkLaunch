@@ -68,7 +68,7 @@ def create_app(config_name=None):
     
     # Register blueprints
     from app.routes import auth, books, reviews, users, admin, articles, tools, competitions, services
-    from app.routes import competitions_admin, manuscript_competitions, marketing, writing
+    from app.routes import competitions_admin, manuscript_competitions, marketing, writing, audit
     
     app.register_blueprint(auth.bp)
     app.register_blueprint(books.bp)
@@ -83,6 +83,7 @@ def create_app(config_name=None):
     app.register_blueprint(manuscript_competitions.bp)
     app.register_blueprint(marketing.marketing_bp)
     app.register_blueprint(writing.writing_bp)
+    app.register_blueprint(audit.bp)
     
     # Register main routes
     from app.routes import main

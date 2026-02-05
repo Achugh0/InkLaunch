@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Book, User, Review
+from app.models_audit import AuditLog
 from app.services.s3_service import s3_service
 from app.services.cloudinary_service import cloudinary_service
 from werkzeug.utils import secure_filename
@@ -174,27 +175,64 @@ def create_book():
             try:
                 # Try Cloudinary first (recommended for production)
                 if cloudinary_service._ensure_config():
+                    current_app.logger.info(f"Attempting Cloudinary upload for: {file.filename}")
                     cover_image_url = cloudinary_service.upload_file(file, folder='book-covers')
-                    if not cover_image_url:
+                    if cover_image_url:
+                        current_app.logger.info(f"Cloudinary upload successful: {cover_image_url}")
+                        AuditLog.log(
+                            category=AuditLog.CATEGORY_BOOK,
+                            action=AuditLog.ACTION_UPLOAD,
+                            user_id=user_id,
+                            details={'filename': file.filename, 'url': cover_image_url, 'service': 'cloudinary'},
+                            ip_address=request.remote_addr
+                        )
+                    else:
                         raise Exception("Cloudinary upload returned None")
                 # Try S3 as fallback
                 elif s3_service.is_s3_configured():
+                    current_app.logger.info(f"Attempting S3 upload for: {file.filename}")
                     cover_image_url = s3_service.upload_file(file, folder='book-covers')
-                    if not cover_image_url:
+                    if cover_image_url:
+                        current_app.logger.info(f"S3 upload successful: {cover_image_url}")
+                        AuditLog.log(
+                            category=AuditLog.CATEGORY_BOOK,
+                            action=AuditLog.ACTION_UPLOAD,
+                            user_id=user_id,
+                            details={'filename': file.filename, 'url': cover_image_url, 'service': 's3'},
+                            ip_address=request.remote_addr
+                        )
+                    else:
                         raise Exception("S3 upload returned None")
                 else:
                     # Fallback to local storage (for development only - not for production)
-                    current_app.logger.warning("Using local storage - images will not persist on Render!")
+                    current_app.logger.warning(f"Using local storage for: {file.filename} - images will not persist on Render!")
                     filename = secure_filename(file.filename)
                     filename = f"{datetime.utcnow().timestamp()}_{filename}"
                     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
                     os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
                     file.save(filepath)
                     cover_image_url = f"/uploads/{filename}"
+                    AuditLog.log(
+                        category=AuditLog.CATEGORY_BOOK,
+                        action=AuditLog.ACTION_UPLOAD,
+                        user_id=user_id,
+                        details={'filename': file.filename, 'url': cover_image_url, 'service': 'local', 'warning': 'ephemeral'},
+                        ip_address=request.remote_addr
+                    )
             except Exception as e:
                 # Log error but continue - cover image is optional
-                current_app.logger.error(f"Failed to save cover image: {str(e)}")
-                flash(f'Warning: Cover image upload failed: {str(e)}', 'warning')
+                error_msg = str(e)
+                current_app.logger.error(f"Failed to save cover image: {error_msg}")
+                AuditLog.log(
+                    category=AuditLog.CATEGORY_BOOK,
+                    action=AuditLog.ACTION_UPLOAD,
+                    user_id=user_id,
+                    details={'filename': file.filename, 'error': error_msg},
+                    ip_address=request.remote_addr,
+                    success=False,
+                    error_message=error_msg
+                )
+                flash(f'Warning: Cover image upload failed: {error_msg}', 'warning')
     
     data = request.form if not request.is_json else request.get_json()
     
@@ -233,6 +271,17 @@ def create_book():
     }
     
     book_id = Book.create(user_id, book_data)
+    
+    # Log book creation
+    AuditLog.log(
+        category=AuditLog.CATEGORY_BOOK,
+        action=AuditLog.ACTION_CREATE,
+        user_id=user_id,
+        target_type='book',
+        target_id=str(book_id),
+        details={'title': title, 'genre': genre, 'has_cover': bool(cover_image_url)},
+        ip_address=request.remote_addr
+    )
     
     if request.is_json:
         return jsonify({
@@ -336,9 +385,33 @@ def edit_book(book_id):
                     file.save(filepath)
                     update_data['cover_image_url'] = f"/uploads/{filename}"
             except Exception as e:
-                current_app.logger.error(f"Failed to save cover image: {str(e)}")
+                error_msg = str(e)
+                current_app.logger.error(f"Failed to save cover image: {error_msg}")
+                # Log upload failure
+                AuditLog.log(
+                    category=AuditLog.CATEGORY_BOOK,
+                    action=AuditLog.ACTION_UPLOAD,
+                    user_id=user_id,
+                    target_type='book',
+                    target_id=book_id,
+                    details={'filename': file.filename, 'error': error_msg},
+                    ip_address=request.remote_addr,
+                    success=False,
+                    error_message=error_msg
+                )
     
     Book.update(book_id, update_data)
+    
+    # Log book update
+    AuditLog.log(
+        category=AuditLog.CATEGORY_BOOK,
+        action=AuditLog.ACTION_UPDATE,
+        user_id=user_id,
+        target_type='book',
+        target_id=book_id,
+        details={'updated_fields': list(update_data.keys()), 'title': book.get('title')},
+        ip_address=request.remote_addr
+    )
     
     if request.is_json:
         return jsonify({'message': 'Book updated successfully'}), 200
@@ -375,6 +448,17 @@ def delete_book(book_id):
         return redirect(url_for('books.get_book', book_id=book_id))
     
     Book.delete(book_id)
+    
+    # Log book deletion
+    AuditLog.log(
+        category=AuditLog.CATEGORY_BOOK,
+        action=AuditLog.ACTION_DELETE,
+        user_id=user_id,
+        target_type='book',
+        target_id=book_id,
+        details={'title': book.get('title'), 'deleted_by_admin': user_role == 'admin'},
+        ip_address=request.remote_addr
+    )
     
     if request.is_json:
         return jsonify({'message': 'Book deleted successfully'}), 200

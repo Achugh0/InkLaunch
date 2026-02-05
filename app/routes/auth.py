@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models import User
+from app.models_audit import AuditLog, UserSession
 from app import mongo
 import re
 
@@ -74,6 +75,18 @@ def register():
     # Create user
     user_id = User.create(email, password, full_name, bio, role)
     
+    # Log registration
+    AuditLog.log(
+        category=AuditLog.CATEGORY_USER,
+        action=AuditLog.ACTION_CREATE,
+        user_id=str(user_id),
+        target_type='user',
+        target_id=str(user_id),
+        details={'email': email, 'role': role},
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent')
+    )
+    
     if request.is_json:
         return jsonify({
             'message': 'Registration successful',
@@ -104,6 +117,18 @@ def login():
     user = User.find_by_email(email)
     
     if not user or not User.verify_password(user, password):
+        # Log failed login attempt
+        AuditLog.log(
+            category=AuditLog.CATEGORY_AUTH,
+            action=AuditLog.ACTION_LOGIN_FAILED,
+            target_type='user',
+            target_id='unknown',
+            details={'email': email, 'reason': 'invalid_credentials'},
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent'),
+            success=False,
+            error_message='Invalid email or password'
+        )
         if request.is_json:
             return jsonify({'error': 'Invalid email or password'}), 401
         flash('Invalid email or password', 'error')
@@ -134,6 +159,23 @@ def login():
     session['user_email'] = user['email']
     session['user_role'] = user['role']
     
+    # Create session record and log login
+    session_id = UserSession.create_session(
+        user_id=str(user['_id']),
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent')
+    )
+    session['session_id'] = str(session_id)
+    
+    AuditLog.log(
+        category=AuditLog.CATEGORY_AUTH,
+        action=AuditLog.ACTION_LOGIN,
+        user_id=str(user['_id']),
+        details={'email': user['email']},
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent')
+    )
+    
     flash('Login successful!', 'success')
     return redirect(url_for('main.dashboard'))
 
@@ -141,6 +183,23 @@ def login():
 @bp.route('/logout', methods=['GET', 'POST'])
 def logout():
     """User logout."""
+    user_id = session.get('user_id')
+    session_id = session.get('session_id')
+    
+    # Log logout
+    if user_id:
+        AuditLog.log(
+            category=AuditLog.CATEGORY_AUTH,
+            action=AuditLog.ACTION_LOGOUT,
+            user_id=user_id,
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent')
+        )
+    
+    # End session
+    if session_id:
+        UserSession.end_session(session_id)
+    
     session.clear()
     
     if request.is_json:
