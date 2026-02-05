@@ -16,11 +16,22 @@
             transform: translateY(-10px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-        .book-cover {
-            height: 240px;
+        .book-cover-frame {
+            height: 260px;
             width: 100%;
-            object-fit: contain;
             background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .book-cover-img {
+            max-height: 100%;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
         }
         .nav-link.active {
             font-weight: bold;
