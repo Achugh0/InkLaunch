@@ -22,7 +22,7 @@
                     By {{ article.author.full_name }}
                     {% endif %}
                     {% if article.published_at %}
-                    • {{ article.published_at.strftime('%B %d, %Y') }}
+                    • {% if article.published_at.strftime is defined %}{{ article.published_at.strftime('%B %d, %Y') }}{% else %}{{ article.published_at }}{% endif %}
                     {% endif %}
                 </div>
                 

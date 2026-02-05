@@ -25,7 +25,7 @@ def list_articles():
         for article in articles:
             try:
                 author = User.find_by_id(str(article['author_id']))
-                article['author'] = author
+                article['author'] = author if author else {'full_name': 'InkLaunch Team', 'bio': ''}
             except Exception as e:
                 # If author not found, use placeholder
                 article['author'] = {'full_name': 'InkLaunch Team', 'bio': ''}
@@ -38,12 +38,15 @@ def list_articles():
                     'excerpt': a.get('excerpt'),
                     'category': a.get('category'),
                     'author': a['author']['full_name'] if a.get('author') else 'Unknown',
-                    'published_at': a['published_at'].isoformat() if a.get('published_at') else None
+                    'published_at': a['published_at'].isoformat() if a.get('published_at') and hasattr(a['published_at'], 'isoformat') else str(a.get('published_at', ''))
                 } for a in articles]
             }), 200
         
         return render_template('articles/list.html', articles=articles, current_category=category)
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in list_articles: {error_details}")
         flash(f'Error loading articles: {str(e)}', 'error')
         return render_template('articles/list.html', articles=[], current_category=None)
 
