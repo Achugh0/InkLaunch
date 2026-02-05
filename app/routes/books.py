@@ -2,6 +2,7 @@
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, flash, session, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Book, User, Review
+from app.services.s3_service import s3_service
 from werkzeug.utils import secure_filename
 from bson import ObjectId
 import os
@@ -159,22 +160,30 @@ def create_book():
                   'Fantasy', 'Biography', 'Self-Help', 'Business']
         return render_template('books/create.html', genres=genres)
     
-    # Handle file upload
+    # Handle file upload or URL
     cover_image_url = ''
-    if 'cover_image' in request.files:
+    
+    # Check if user provided a URL instead
+    if 'cover_image_url' in request.form and request.form['cover_image_url'].strip():
+        cover_image_url = request.form['cover_image_url'].strip()
+    # Otherwise check for file upload
+    elif 'cover_image' in request.files:
         file = request.files['cover_image']
         if file and file.filename and allowed_file(file.filename):
             try:
-                filename = secure_filename(file.filename)
-                # Add timestamp to avoid conflicts
-                filename = f"{datetime.utcnow().timestamp()}_{filename}"
-                filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-                
-                # Ensure upload directory exists
-                os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-                
-                file.save(filepath)
-                cover_image_url = f"/uploads/{filename}"
+                # Try S3 upload first
+                if s3_service.is_s3_configured():
+                    cover_image_url = s3_service.upload_file(file, folder='book-covers')
+                    if not cover_image_url:
+                        raise Exception("S3 upload returned None")
+                else:
+                    # Fallback to local storage (for development)
+                    filename = secure_filename(file.filename)
+                    filename = f"{datetime.utcnow().timestamp()}_{filename}"
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    file.save(filepath)
+                    cover_image_url = f"/uploads/{filename}"
             except Exception as e:
                 # Log error but continue - cover image is optional
                 current_app.logger.error(f"Failed to save cover image: {str(e)}")
@@ -284,15 +293,32 @@ def edit_book(book_id):
     if 'goodreads_link' in data:
         update_data['goodreads_link'] = data['goodreads_link'].strip()
     
-    # Handle new cover image
-    if 'cover_image' in request.files:
+    # Handle new cover image (URL or file upload)
+    if 'cover_image_url' in request.form and request.form['cover_image_url'].strip():
+        # User provided a URL
+        update_data['cover_image_url'] = request.form['cover_image_url'].strip()
+    elif 'cover_image' in request.files:
         file = request.files['cover_image']
         if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filename = f"{datetime.utcnow().timestamp()}_{filename}"
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            update_data['cover_image_url'] = f"/uploads/{filename}"
+            try:
+                # Try S3 upload first
+                if s3_service.is_s3_configured():
+                    cover_image_url = s3_service.upload_file(file, folder='book-covers')
+                    if cover_image_url:
+                        update_data['cover_image_url'] = cover_image_url
+                        # Optionally delete old image from S3 if it exists
+                        old_url = book.get('cover_image_url')
+                        if old_url and 's3.amazonaws.com' in old_url:
+                            s3_service.delete_file(old_url)
+                else:
+                    # Fallback to local storage (for development)
+                    filename = secure_filename(file.filename)
+                    filename = f"{datetime.utcnow().timestamp()}_{filename}"
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+                    file.save(filepath)
+                    update_data['cover_image_url'] = f"/uploads/{filename}"
+            except Exception as e:
+                current_app.logger.error(f"Failed to save cover image: {str(e)}")
     
     Book.update(book_id, update_data)
     

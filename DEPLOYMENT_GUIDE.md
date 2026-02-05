@@ -1,5 +1,29 @@
 # InkLaunch Deployment Guide
 
+## 📸 Image Storage Options
+
+Railway/Render use ephemeral storage - uploaded files don't persist. You have **two options**:
+
+### Option 1: Image URLs (No Setup Required) ⚡
+Users provide direct URLs to images from free services like Imgur, Dropbox, Google Drive, etc.
+- ✅ Zero setup
+- ✅ Works immediately  
+- ✅ Free
+- ✅ Simple for users
+
+**👉 [See IMAGE_URL_GUIDE.md for details](IMAGE_URL_GUIDE.md)**
+
+### Option 2: AWS S3 (Full Upload Feature) 🔧
+Professional file upload directly through the app with persistent storage.
+- ✅ Better UX
+- ✅ Professional
+- ❌ Requires AWS setup
+- ❌ ~$0.10/month
+
+**👉 [See S3_SETUP_GUIDE.md for setup](S3_SETUP_GUIDE.md)**
+
+---
+
 ## ✅ Fixes Applied
 
 The following deployment configurations have been added to fix the Railway build:
@@ -10,11 +34,13 @@ The following deployment configurations have been added to fix the Railway build
 4. **railway.json** - Railway-specific configuration
 5. **.railwayignore** - Optimizes build by excluding unnecessary files
 6. **requirements.txt** - Added Gunicorn, temporarily disabled Pillow
+7. **S3 Integration** - Added AWS S3 support for persistent image storage (optional)
+8. **URL Input** - Added image URL input option for users (no S3 needed)
 
 ## 🚀 Railway Deployment Steps
 
 ### 1. Railway should auto-detect the changes
-   - The new commit will trigger an automatic rebuild
+  Optional - Only for file upload feature (otherwise users can use image URLsld
    - Check the build logs in Railway dashboard
 
 ### 2. Required Environment Variables
@@ -29,12 +55,14 @@ JWT_SECRET_KEY=your-jwt-secret-key-change-this-min-32-chars
 FLASK_ENV=production
 DEBUG=False
 
-# Optional (for full features)
-OPENAI_API_KEY=sk-your-openai-api-key
+# Required for Image Storage (See S3_SETUP_GUIDE.md)
 AWS_ACCESS_KEY_ID=your-aws-key
 AWS_SECRET_ACCESS_KEY=your-aws-secret
 AWS_S3_BUCKET_NAME=inklaunch-book-covers
 AWS_REGION=us-east-1
+
+# Optional (for AI features)
+OPENAI_API_KEY=sk-your-openai-api-key
 
 # Email (Optional)
 MAIL_SERVER=smtp.gmail.com

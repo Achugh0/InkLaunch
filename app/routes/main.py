@@ -65,7 +65,8 @@ def dashboard():
 
 @bp.route('/uploads/<filename>')
 def uploaded_file(filename):
-    """Serve uploaded files."""
+    """Serve uploaded files. This is a fallback for local development.
+    In production, images should be served directly from S3."""
     return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
 
 

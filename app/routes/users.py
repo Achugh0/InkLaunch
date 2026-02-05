@@ -1,6 +1,7 @@
 """User routes."""
 from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, flash, current_app
 from app.models import User, Book, Review, CompetitionSubmission
+from app.services.s3_service import s3_service
 from app import bcrypt, mongo
 from bson import ObjectId
 from datetime import datetime
@@ -241,51 +242,71 @@ def edit_profile():
     if 'profile_image' in request.files:
         file = request.files['profile_image']
         if file and file.filename and allowed_file(file.filename):
-            # Delete old profile image if exists
-            old_image = user.get('profile_image_url', '')
-            if old_image and old_image.startswith('/uploads/'):
-                old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_image))
-                if os.path.exists(old_path):
-                    try:
-                        os.remove(old_path)
-                    except:
-                        pass
-            
-            # Save new image
-            filename = secure_filename(file.filename)
-            timestamp = datetime.utcnow().timestamp()
-            unique_filename = f"{timestamp}_{filename}"
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-            
-            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-            file.save(filepath)
-            
-            update_data['profile_image_url'] = f"/uploads/{unique_filename}"
+            try:
+                # Delete old profile image if exists
+                old_image = user.get('profile_image_url', '')
+                if old_image:
+                    if 's3.amazonaws.com' in old_image:
+                        s3_service.delete_file(old_image)
+                    elif old_image.startswith('/uploads/'):
+                        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_image))
+                        if os.path.exists(old_path):
+                            try:
+                                os.remove(old_path)
+                            except:
+                                pass
+                
+                # Upload new image
+                if s3_service.is_s3_configured():
+                    profile_url = s3_service.upload_file(file, folder='profiles')
+                    if profile_url:
+                        update_data['profile_image_url'] = profile_url
+                else:
+                    # Fallback to local storage
+                    filename = secure_filename(file.filename)
+                    timestamp = datetime.utcnow().timestamp()
+                    unique_filename = f"{timestamp}_{filename}"
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+                    os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    file.save(filepath)
+                    update_data['profile_image_url'] = f"/uploads/{unique_filename}"
+            except Exception as e:
+                current_app.logger.error(f"Failed to upload profile image: {str(e)}")
     
     # Handle banner image upload
     if 'banner_image' in request.files:
         file = request.files['banner_image']
         if file and file.filename and allowed_file(file.filename):
-            # Delete old banner image if exists
-            old_banner = user.get('banner_image_url', '')
-            if old_banner and old_banner.startswith('/uploads/'):
-                old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_banner))
-                if os.path.exists(old_path):
-                    try:
-                        os.remove(old_path)
-                    except:
-                        pass
-            
-            # Save new banner
-            filename = secure_filename(file.filename)
-            timestamp = datetime.utcnow().timestamp()
-            unique_filename = f"banner_{timestamp}_{filename}"
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-            
-            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-            file.save(filepath)
-            
-            update_data['banner_image_url'] = f"/uploads/{unique_filename}"
+            try:
+                # Delete old banner image if exists
+                old_banner = user.get('banner_image_url', '')
+                if old_banner:
+                    if 's3.amazonaws.com' in old_banner:
+                        s3_service.delete_file(old_banner)
+                    elif old_banner.startswith('/uploads/'):
+                        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_banner))
+                        if os.path.exists(old_path):
+                            try:
+                                os.remove(old_path)
+                            except:
+                                pass
+                
+                # Upload new banner
+                if s3_service.is_s3_configured():
+                    banner_url = s3_service.upload_file(file, folder='banners')
+                    if banner_url:
+                        update_data['banner_image_url'] = banner_url
+                else:
+                    # Fallback to local storage
+                    filename = secure_filename(file.filename)
+                    timestamp = datetime.utcnow().timestamp()
+                    unique_filename = f"banner_{timestamp}_{filename}"
+                    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+                    os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    file.save(filepath)
+                    update_data['banner_image_url'] = f"/uploads/{unique_filename}"
+            except Exception as e:
+                current_app.logger.error(f"Failed to upload banner image: {str(e)}")
     
     update_data['updated_at'] = datetime.utcnow()
     User.update(user_id, update_data)
@@ -364,13 +385,16 @@ def delete_profile_photo():
     
     # Delete old profile image if exists
     old_image = user.get('profile_image_url', '')
-    if old_image and old_image.startswith('/uploads/'):
-        old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_image))
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except:
-                pass
+    if old_image:
+        if 's3.amazonaws.com' in old_image:
+            s3_service.delete_file(old_image)
+        elif old_image.startswith('/uploads/'):
+            old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], os.path.basename(old_image))
+            if os.path.exists(old_path):
+                try:
+                    os.remove(old_path)
+                except:
+                    pass
     
     # Remove from database
     User.update(user_id, {'profile_image_url': ''})
