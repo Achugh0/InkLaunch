@@ -305,9 +305,14 @@ def create_competition():
         return redirect(url_for('competitions_admin.view_competition', competition_id=competition_id))
     
     # Available genres
-    genres = ['Fiction', 'Mystery', 'Thriller', 'Romance', 'Science Fiction', 
-              'Fantasy', 'Horror', 'Literary Fiction', 'Historical Fiction',
-              'Non-Fiction', 'Biography', 'Self-Help', 'Poetry']
+    genres = ['Action', 'Adventure', 'Art', 'Biography', 'Business',
+              'Children', 'Cooking', 'Crime', 'Dystopian', 'Education',
+              'Essays', 'Fantasy', 'Fiction', 'Graphic Novel', 'Health',
+              'Historical Fiction', 'History', 'Horror', 'Literary Fiction',
+              'Memoir', 'Middle Grade', 'Mystery', 'Non-Fiction', 'Philosophy',
+              'Poetry', 'Politics', 'Religion', 'Romance', 'Science',
+              'Science Fiction', 'Self-Help', 'Technology', 'Thriller',
+              'Travel', 'True Crime', 'Young Adult']
     
     return render_template('admin/competitions/create.html', genres=genres)
 
@@ -590,9 +595,14 @@ def edit_competition(competition_id):
         flash('Competition updated successfully!', 'success')
         return redirect(url_for('competitions_admin.view_competition', competition_id=competition_id))
     
-    genres = ['Fiction', 'Mystery', 'Thriller', 'Romance', 'Science Fiction', 
-              'Fantasy', 'Horror', 'Literary Fiction', 'Historical Fiction',
-              'Non-Fiction', 'Biography', 'Self-Help', 'Poetry']
+    genres = ['Action', 'Adventure', 'Art', 'Biography', 'Business',
+              'Children', 'Cooking', 'Crime', 'Dystopian', 'Education',
+              'Essays', 'Fantasy', 'Fiction', 'Graphic Novel', 'Health',
+              'Historical Fiction', 'History', 'Horror', 'Literary Fiction',
+              'Memoir', 'Middle Grade', 'Mystery', 'Non-Fiction', 'Philosophy',
+              'Poetry', 'Politics', 'Religion', 'Romance', 'Science',
+              'Science Fiction', 'Self-Help', 'Technology', 'Thriller',
+              'Travel', 'True Crime', 'Young Adult']
     
     return render_template('admin/competitions/edit.html', 
                          competition=competition,

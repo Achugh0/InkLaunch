@@ -197,6 +197,187 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div id="cookie-consent" class="cookie-consent" role="dialog" aria-live="polite" aria-label="Cookie consent" hidden>
+        <div class="cookie-consent__card">
+            <div class="cookie-consent__header">
+                <strong>We use cookies</strong>
+                <button type="button" class="btn-close" id="cookie-consent-close" aria-label="Close"></button>
+            </div>
+            <p class="cookie-consent__text">
+                We use cookies to keep the site running, remember preferences, and understand usage. Choose which cookies you allow.
+            </p>
+            <div class="cookie-consent__options">
+                <label class="cookie-consent__option">
+                    <input type="checkbox" checked disabled>
+                    <span>Necessary</span>
+                    <small>Required for basic site functions.</small>
+                </label>
+                <label class="cookie-consent__option">
+                    <input type="checkbox" id="cookie-analytics">
+                    <span>Analytics</span>
+                    <small>Helps us understand site usage.</small>
+                </label>
+                <label class="cookie-consent__option">
+                    <input type="checkbox" id="cookie-preferences">
+                    <span>Preferences</span>
+                    <small>Remembers your settings.</small>
+                </label>
+                <label class="cookie-consent__option">
+                    <input type="checkbox" id="cookie-marketing">
+                    <span>Marketing</span>
+                    <small>Personalized content and ads.</small>
+                </label>
+            </div>
+            <div class="cookie-consent__actions">
+                <button type="button" class="btn btn-outline-secondary" id="cookie-reject">Reject non-essential</button>
+                <button type="button" class="btn btn-outline-primary" id="cookie-save">Save preferences</button>
+                <button type="button" class="btn btn-primary" id="cookie-accept">Accept all</button>
+            </div>
+        </div>
+    </div>
     {% block scripts %}{% endblock %}
+    <style>
+        .cookie-consent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            z-index: 1200;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(6px);
+        }
+        .cookie-consent__card {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .cookie-consent__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .cookie-consent__text {
+            margin-bottom: 12px;
+            color: #4a5568;
+        }
+        .cookie-consent__options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .cookie-consent__option {
+            display: grid;
+            gap: 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+        .cookie-consent__option input {
+            margin-right: 8px;
+        }
+        .cookie-consent__option small {
+            color: #718096;
+        }
+        .cookie-consent__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        @media (max-width: 576px) {
+            .cookie-consent__actions {
+                justify-content: stretch;
+            }
+            .cookie-consent__actions .btn {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+    <script>
+        (function () {
+            var banner = document.getElementById('cookie-consent');
+            var acceptBtn = document.getElementById('cookie-accept');
+            var rejectBtn = document.getElementById('cookie-reject');
+            var saveBtn = document.getElementById('cookie-save');
+            var closeBtn = document.getElementById('cookie-consent-close');
+            var analyticsBox = document.getElementById('cookie-analytics');
+            var preferencesBox = document.getElementById('cookie-preferences');
+            var marketingBox = document.getElementById('cookie-marketing');
+
+            function getConsent() {
+                try {
+                    return JSON.parse(localStorage.getItem('cookieConsent'));
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function setConsent(consent) {
+                localStorage.setItem('cookieConsent', JSON.stringify(consent));
+                banner.hidden = true;
+            }
+
+            function showBanner() {
+                banner.hidden = false;
+            }
+
+            function applyConsent(consent) {
+                if (!consent) {
+                    return;
+                }
+                analyticsBox.checked = !!consent.analytics;
+                preferencesBox.checked = !!consent.preferences;
+                marketingBox.checked = !!consent.marketing;
+            }
+
+            var existing = getConsent();
+            if (!existing) {
+                showBanner();
+            } else {
+                applyConsent(existing);
+            }
+
+            acceptBtn.addEventListener('click', function () {
+                setConsent({
+                    necessary: true,
+                    analytics: true,
+                    preferences: true,
+                    marketing: true,
+                    updatedAt: new Date().toISOString()
+                });
+            });
+
+            rejectBtn.addEventListener('click', function () {
+                setConsent({
+                    necessary: true,
+                    analytics: false,
+                    preferences: false,
+                    marketing: false,
+                    updatedAt: new Date().toISOString()
+                });
+            });
+
+            saveBtn.addEventListener('click', function () {
+                setConsent({
+                    necessary: true,
+                    analytics: analyticsBox.checked,
+                    preferences: preferencesBox.checked,
+                    marketing: marketingBox.checked,
+                    updatedAt: new Date().toISOString()
+                });
+            });
+
+            closeBtn.addEventListener('click', function () {
+                banner.hidden = true;
+            });
+        })();
+    </script>
 </body>
 </html>
