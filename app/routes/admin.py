@@ -1,8 +1,11 @@
 """Admin routes."""
-from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, flash, send_file
+from flask import Blueprint, request, jsonify, render_template, redirect, url_for, session, flash, send_file, abort
 from app.models import User, Book, Review, CompetitionPeriod, Nomination
+from app.models_audit import AuditLog
+from app.security import require_admin as require_admin_decorator, validate_object_id
 from app import mongo, bcrypt
 from bson import ObjectId
+from bson.errors import InvalidId
 from datetime import datetime
 import csv
 import io
@@ -13,6 +16,12 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 def require_admin():
     """Check if user is admin."""
+    user_id = session.get('user_id')
+    user_role = session.get('user_role')
+    
+    if not user_id or user_role != 'admin':
+        flash('Admin access required', 'error')
+        abort(403)
     user_id = session.get('user_id')
     user_role = session.get('user_role')
     
@@ -85,6 +94,10 @@ def edit_user(user_id):
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
     
+    if not validate_object_id(user_id):
+        flash('Invalid user ID', 'error')
+        return redirect(url_for('admin.list_users'))
+    
     user = User.find_by_id(user_id)
     if not user:
         flash('User not found', 'error')
@@ -115,6 +128,12 @@ def delete_user(user_id):
             return jsonify({'error': 'Admin access required'}), 403
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
+    
+    if not validate_object_id(user_id):
+        if request.is_json:
+            return jsonify({'error': 'Invalid user ID'}), 400
+        flash('Invalid user ID', 'error')
+        return redirect(url_for('admin.list_users'))
     
     # Don't allow deleting yourself
     if user_id == session.get('user_id'):
@@ -154,6 +173,12 @@ def reset_user_password(user_id):
             return jsonify({'error': 'Admin access required'}), 403
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
+    
+    if not validate_object_id(user_id):
+        if request.is_json:
+            return jsonify({'error': 'Invalid user ID'}), 400
+        flash('Invalid user ID', 'error')
+        return redirect(url_for('admin.list_users'))
     
     user = User.find_by_id(user_id)
     if not user:
@@ -232,6 +257,12 @@ def delete_book(book_id):
             return jsonify({'error': 'Admin access required'}), 403
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
+    
+    if not validate_object_id(book_id):
+        if request.is_json:
+            return jsonify({'error': 'Invalid book ID'}), 400
+        flash('Invalid book ID', 'error')
+        return redirect(url_for('admin.list_books'))
     
     book = Book.find_by_id(book_id)
     if not book:

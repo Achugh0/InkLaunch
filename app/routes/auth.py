@@ -114,6 +114,33 @@ def login():
         flash('Email and password are required', 'error')
         return redirect(url_for('auth.login'))
     
+    # Rate limiting for failed login attempts
+    from app.security import check_rate_limit
+    from flask import current_app
+    
+    if current_app.config.get('RATELIMIT_ENABLED', True):
+        rate_limit_key = f"login:{request.remote_addr}"
+        if not check_rate_limit(
+            rate_limit_key, 
+            'login_attempt',
+            limit=current_app.config.get('LOGIN_ATTEMPTS_LIMIT', 5),
+            window=current_app.config.get('LOGIN_ATTEMPTS_WINDOW', 900)
+        ):
+            # Log security event
+            AuditLog.log(
+                category=AuditLog.CATEGORY_SECURITY,
+                action=AuditLog.ACTION_WARNING,
+                details={'reason': 'rate_limit_exceeded', 'ip': request.remote_addr},
+                ip_address=request.remote_addr,
+                user_agent=request.headers.get('User-Agent'),
+                success=False,
+                error_message='Too many login attempts'
+            )
+            if request.is_json:
+                return jsonify({'error': 'Too many login attempts. Please try again later.'}), 429
+            flash('Too many login attempts. Please try again later.', 'error')
+            return redirect(url_for('auth.login'))
+    
     user = User.find_by_email(email)
     
     if not user or not User.verify_password(user, password):

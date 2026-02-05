@@ -13,6 +13,21 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
     
+    # Security
+    SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'True').lower() == 'true'  # HTTPS only
+    SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access
+    SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+    PERMANENT_SESSION_LIFETIME = 86400  # 24 hours
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max upload
+    FORCE_HTTPS = os.getenv('FORCE_HTTPS', 'True').lower() == 'true'
+    
+    # Rate limiting
+    RATELIMIT_ENABLED = os.getenv('RATELIMIT_ENABLED', 'True').lower() == 'true'
+    LOGIN_ATTEMPTS_LIMIT = int(os.getenv('LOGIN_ATTEMPTS_LIMIT', '5'))
+    LOGIN_ATTEMPTS_WINDOW = int(os.getenv('LOGIN_ATTEMPTS_WINDOW', '900'))  # 15 minutes
+    UPLOAD_RATE_LIMIT = int(os.getenv('UPLOAD_RATE_LIMIT', '10'))
+    UPLOAD_RATE_WINDOW = int(os.getenv('UPLOAD_RATE_WINDOW', '3600'))  # 1 hour
+    
     # MongoDB
     MONGO_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/inklaunch?serverSelectionTimeoutMS=2000&connectTimeoutMS=2000')
     MONGO_DBNAME = os.getenv('MONGODB_DB_NAME', 'inklaunch')
@@ -52,10 +67,9 @@ class Config:
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD', '')
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', 'noreply@inklaunch.com')
     
-    # Upload
-    MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', '5242880'))  # 5MB
+    # Upload (moved MAX_CONTENT_LENGTH to Security section above)
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')
-    ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'jpg,jpeg,png,gif').split(','))
+    ALLOWED_EXTENSIONS = set(os.getenv('ALLOWED_EXTENSIONS', 'jpg,jpeg,png,gif,webp').split(','))
     
     # Pagination
     ITEMS_PER_PAGE = int(os.getenv('ITEMS_PER_PAGE', '20'))
