@@ -21,6 +21,7 @@ markdown==3.5.1
 # File Handling
 # Pillow==10.1.0  # Commented out - will add back when image processing is needed
 boto3==1.34.19
+cloudinary==1.36.0
 
 # AI Integration
 openai==1.7.2
