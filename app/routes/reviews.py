@@ -104,20 +104,44 @@ def approve_review(review_id):
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
     
-    review = Review.find_by_id(review_id)
-    if not review:
+    try:
+        review = Review.find_by_id(review_id)
+        if not review:
+            if request.is_json:
+                return jsonify({'error': 'Review not found'}), 404
+            flash('Review not found', 'error')
+            return redirect(url_for('reviews.list_reviews'))
+        
+        # Update review status
+        Review.update_status(review_id, 'approved')
+        
+        # Update book rating statistics
+        book_id = str(review['book_id'])
+        rating_stats = Review.get_average_rating(book_id)
+        
+        mongo.db.books.update_one(
+            {'_id': ObjectId(book_id)},
+            {
+                '$set': {
+                    'average_rating': rating_stats['average'],
+                    'number_of_reviews': rating_stats['count'],
+                    'total_rating': rating_stats['average'] * rating_stats['count']
+                }
+            }
+        )
+        
         if request.is_json:
-            return jsonify({'error': 'Review not found'}), 404
-        flash('Review not found', 'error')
+            return jsonify({'message': 'Review approved successfully'}), 200
+        
+        flash('Review approved successfully', 'success')
         return redirect(url_for('reviews.list_reviews'))
-    
-    Review.update_status(review_id, 'approved')
-    
-    if request.is_json:
-        return jsonify({'message': 'Review approved successfully'}), 200
-    
-    flash('Review approved successfully', 'success')
-    return redirect(url_for('reviews.list_reviews'))
+        
+    except Exception as e:
+        current_app.logger.error(f'Error approving review: {str(e)}')
+        if request.is_json:
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+        flash(f'Error approving review: {str(e)}', 'error')
+        return redirect(url_for('reviews.list_reviews'))
 
 
 @bp.route('/<review_id>/reject', methods=['POST'])
@@ -131,20 +155,28 @@ def reject_review(review_id):
         flash('Admin access required', 'error')
         return redirect(url_for('main.index'))
     
-    review = Review.find_by_id(review_id)
-    if not review:
+    try:
+        review = Review.find_by_id(review_id)
+        if not review:
+            if request.is_json:
+                return jsonify({'error': 'Review not found'}), 404
+            flash('Review not found', 'error')
+            return redirect(url_for('reviews.list_reviews'))
+        
+        Review.update_status(review_id, 'rejected')
+        
         if request.is_json:
-            return jsonify({'error': 'Review not found'}), 404
-        flash('Review not found', 'error')
+            return jsonify({'message': 'Review rejected successfully'}), 200
+        
+        flash('Review rejected', 'success')
         return redirect(url_for('reviews.list_reviews'))
-    
-    Review.update_status(review_id, 'rejected')
-    
-    if request.is_json:
-        return jsonify({'message': 'Review rejected successfully'}), 200
-    
-    flash('Review rejected', 'success')
-    return redirect(url_for('reviews.list_reviews'))
+        
+    except Exception as e:
+        current_app.logger.error(f'Error rejecting review: {str(e)}')
+        if request.is_json:
+            return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+        flash(f'Error rejecting review: {str(e)}', 'error')
+        return redirect(url_for('reviews.list_reviews'))
 
 
 @bp.route('/<review_id>/delete', methods=['POST'])
