@@ -176,11 +176,13 @@
         {% for book in books %}
         <div class="col-lg-3 col-md-4 col-sm-6">
             <div class="card book-card-modern border-0 shadow h-100" onclick="window.location='{{ url_for('books.get_book', book_id=book._id) }}'" style="cursor: pointer;">
-                <div class="position-relative overflow-hidden">
+                <div class="position-relative">
                     {% if book.cover_image_url %}
-                    <img src="{{ book.cover_image_url|media_url }}" class="card-img-top" alt="{{ book.title }}" style="height: 320px; object-fit: cover;">
+                    <div class="card-img-top book-cover-frame" style="height: 320px;">
+                        <img src="{{ book.cover_image_url|media_url }}" class="book-cover-img" alt="{{ book.title }}">
+                    </div>
                     {% else %}
-                    <div class="card-img-top d-flex align-items-center justify-content-center position-relative" 
+                    <div class="card-img-top book-cover-frame d-flex align-items-center justify-content-center position-relative" 
                          style="height: 320px; background: linear-gradient(135deg, {{ ['#f093fb 0%, #f5576c', '#4facfe 0%, #00f2fe', '#43e97b 0%, #38f9d7', '#fa709a 0%, #fee140', '#667eea 0%, #764ba2', '#ff6e7f 0%, #bfe9ff'][loop.index0 % 6] }} 100%);">
                         <div class="text-center text-white p-3">
                             <i class="bi bi-book-fill" style="font-size: 4rem; opacity: 0.3;"></i>

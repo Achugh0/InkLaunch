@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Smart Genre Selector</h1>
+<form method="post">
+    <label for="excerpt">Paste manuscript excerpt:</label><br>
+    <textarea name="excerpt" id="excerpt" rows="6" cols="60">{{ excerpt }}</textarea><br>
+    <span>{{ excerpt|length }} characters</span><br>
+    <button type="submit">Analyze with AI</button>
+</form>
+{% if ai_suggestions %}
+    <h3>AI Genre Suggestions</h3>
+    <ul>
+    {% for genre in ai_suggestions %}
+        <li>{{ genre }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}
+<h3>Genre Taxonomy</h3>
+<form>
+    <label>Category:</label>
+    <select>
+        {% for group in genres %}
+            <option>{{ group.category }}</option>
+        {% endfor %}
+    </select>
+    <label>Genre:</label>
+    <select>
+        {% for group in genres %}
+            {% for genre in group.genres %}
+                <option>{{ genre }}</option>
+            {% endfor %}
+        {% endfor %}
+    </select>
+    <label>Age Category:</label>
+    <select>
+        <option>YA</option>
+        <option>Adult</option>
+        <option>MG</option>
+    </select>
+    <!-- TODO: Add subgenre, cross-genre, hybrid support -->
+</form>
+{% endblock %}

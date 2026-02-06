@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Metadata Editor</h1>
+<form method="post">
+    <label for="isbn">ISBN:</label>
+    <input type="text" name="isbn" id="isbn" value="{{ metadata.isbn }}"><br>
+    <label for="author">Author:</label>
+    <input type="text" name="author" id="author" value="{{ metadata.author }}"><br>
+    <label for="title">Title:</label>
+    <input type="text" name="title" id="title" value="{{ metadata.title }}"><br>
+    <label for="description">Description:</label><br>
+    <textarea name="description" id="description" rows="4" cols="60">{{ metadata.description }}</textarea><br>
+    <button type="submit">Save Metadata</button>
+</form>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Brand Kit Creation</h1>
+<form method="post">
+    <label for="author_name">Author Name:</label>
+    <input type="text" name="author_name" id="author_name"><br>
+    <label for="tagline">Tagline:</label>
+    <input type="text" name="tagline" id="tagline"><br>
+    <button type="submit">Create Brand Kit</button>
+</form>
+{% if brand_kit %}
+    <h3>Your Brand Kit</h3>
+    <p><strong>Name:</strong> {{ brand_kit.author_name }}</p>
+    <p><strong>Tagline:</strong> {{ brand_kit.tagline }}</p>
+    <img src="{{ brand_kit.logo_url }}" alt="Logo" width="120">
+    <p><strong>Palette:</strong> {{ brand_kit.palette }}</p>
+    <p><strong>Fonts:</strong> {{ brand_kit.fonts }}</p>
+{% endif %}
+{% endblock %}

@@ -109,6 +109,13 @@ def create_app(config_name=None):
     # Register blueprints
     from app.routes import auth, books, reviews, users, admin, articles, tools, competitions, services
     from app.routes import competitions_admin, manuscript_competitions, marketing, writing, audit
+    from app.routes.analytics import analytics_bp
+    from app.routes.pulse import pulse_bp
+    from app.routes.genre_selector import genre_selector_bp
+    from app.routes.genre_intelligence import genre_intel_bp
+    from app.routes.brand_kit import brand_kit_bp
+    from app.routes.epub_validator import epub_validator_bp
+    from app.routes.metadata_editor import metadata_editor_bp
     
     app.register_blueprint(auth.bp)
     app.register_blueprint(books.bp)
@@ -124,6 +131,14 @@ def create_app(config_name=None):
     app.register_blueprint(marketing.marketing_bp)
     app.register_blueprint(writing.writing_bp)
     app.register_blueprint(audit.bp)
+    app.register_blueprint(analytics_bp)
+    app.register_blueprint(pulse_bp)
+    app.register_blueprint(genre_selector_bp)
+    app.register_blueprint(genre_intel_bp)
+    app.register_blueprint(brand_kit_bp)
+    app.register_blueprint(epub_validator_bp)
+    app.register_blueprint(metadata_editor_bp)
+    app.register_blueprint(analytics_bp)
     
     # Register main routes
     from app.routes import main

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Reader Analytics Dashboard</h1>
+<div>
+    <p><strong>Active Readers:</strong> {{ engagement_data.active_readers }}</p>
+    <p><strong>Average Session Time:</strong> {{ engagement_data.avg_session_time }} min</p>
+    <p><strong>Pages Read:</strong> {{ engagement_data.pages_read }}</p>
+    <p><strong>Completion Rate:</strong> {{ engagement_data.completion_rate }}%</p>
+    <h3>Top Books</h3>
+    <ul>
+    {% for book in engagement_data.top_books %}
+        <li>{{ book.title }} ({{ book.readers }} readers)</li>
+    {% endfor %}
+    </ul>
+</div>
+<!-- TODO: Add charts/visualizations -->
+{% endblock %}

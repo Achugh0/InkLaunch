@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Smart Genre Intelligence Tools</h1>
+<form method="post">
+    <label for="excerpt">Paste manuscript excerpt:</label><br>
+    <textarea name="excerpt" id="excerpt" rows="6" cols="60">{{ request.form.excerpt or '' }}</textarea><br>
+    <button type="submit">Analyze</button>
+</form>
+{% if suggestions %}
+    <h3>1. Genre Suggestion Engine</h3>
+    <ul>{% for genre in suggestions %}<li>{{ genre }}</li>{% endfor %}</ul>
+{% endif %}
+{% if competitive %}
+    <h3>2. Competitive Analysis</h3>
+    <ul>{% for book in competitive.bestsellers %}<li>{{ book }}</li>{% endfor %}</ul>
+    <p>Sales Data: {{ competitive.sales_data }}</p>
+{% endif %}
+{% if trends %}
+    <h3>3. Market Trends</h3>
+    <ul>{% for trend in trends.trending %}<li>{{ trend }}</li>{% endfor %}</ul>
+    <p>Seasonal: {{ trends.seasonal }}</p>
+{% endif %}
+{% if keywords %}
+    <h3>4. Keyword Recommendations</h3>
+    <ul>{% for kw in keywords %}<li>{{ kw }}</li>{% endfor %}</ul>
+{% endif %}
+{% if cover %}
+    <h3>5. Cover Style Guidance</h3>
+    <ul>{% for style in cover %}<li>{{ style }}</li>{% endfor %}</ul>
+{% endif %}
+{% if pricing %}
+    <h3>6. Pricing Recommendations</h3>
+    <p>Ebook: ${{ pricing.ebook }} | Paperback: ${{ pricing.paperback }}</p>
+{% endif %}
+{% if marketing %}
+    <h3>7. Marketing Platform Suggestions</h3>
+    <ul>{% for platform in marketing %}<li>{{ platform }}</li>{% endfor %}</ul>
+{% endif %}
+{% endblock %}

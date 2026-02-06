@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Pulse Analysis Engine</h1>
+<div>
+    <ul>
+        <li><strong>Pacing Rhythm:</strong> {{ metrics.pacing_rhythm }}%</li>
+        <li><strong>Narrative Momentum:</strong> {{ metrics.narrative_momentum }}%</li>
+        <li><strong>Character Consistency:</strong> {{ metrics.character_consistency }}%</li>
+        <li><strong>Chapter Flow:</strong> {{ metrics.chapter_flow }}%</li>
+        <li><strong>Engagement Score:</strong> {{ metrics.engagement_score }}%</li>
+        <li><strong>Genre Alignment:</strong> {{ metrics.genre_alignment }}%</li>
+    </ul>
+    <h3>Live Manuscript Heartbeat</h3>
+    <div id="heartbeat-wave">[wave visualization placeholder]</div>
+    <h3>Chapter-by-Chapter Feedback</h3>
+    <ul>
+    {% for feedback in metrics.chapter_feedback %}
+        <li>Chapter {{ feedback.chapter }}: {{ feedback.score }}%</li>
+    {% endfor %}
+    </ul>
+    <p><strong>Redundancy:</strong> {{ metrics.redundancy }}</p>
+    <p><strong>Repetition:</strong> {{ metrics.repetition }}</p>
+    <!-- TODO: Add JS for live wave visualization and 12-dimension editing -->
+</div>
+{% endblock %}

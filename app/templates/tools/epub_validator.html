@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>EPUB Validator</h1>
+<form method="post" enctype="multipart/form-data">
+    <label for="epub_file">Upload EPUB file (max 50MB):</label>
+    <input type="file" name="epub_file" id="epub_file" accept=".epub">
+    <button type="submit">Validate</button>
+</form>
+{% if report %}
+    <h3>Validation Results</h3>
+    <p><strong>Passed:</strong> <span style="color:green;">{{ report.passed }}</span></p>
+    <p><strong>Metadata:</strong> {{ report.metadata }}</p>
+    <p><strong>Navigation:</strong> {{ report.navigation }}</p>
+    <p><strong>File Size:</strong> {{ report.file_size }} MB</p>
+    <h4>Warnings</h4>
+    <ul>{% for w in report.warnings %}<li style="color:orange;">{{ w }}</li>{% endfor %}</ul>
+    <h4>Errors</h4>
+    <ul>{% for e in report.errors %}<li style="color:red;">{{ e }}</li>{% endfor %}</ul>
+    <a href="{{ report.report_download_url }}" download>Download Full Report</a>
+{% endif %}
+{% endblock %}
